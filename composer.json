@@ -21,7 +21,7 @@
   },
   "autoload"         : {
     "psr-0": {
-      "ViKon\\Wiki\\": "src/"
+      "ViKon\\DbExporter\\": "src/"
     }
   },
   "minimum-stability": "stable"
