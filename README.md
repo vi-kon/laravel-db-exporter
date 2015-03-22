@@ -11,9 +11,9 @@ This is database table structure and data exporter to migration and seed files f
 
 ## Features
 
-* create **migration** files from database table structure
+* create **migration** files from database table structure 
 * handle foreign keys (watch for recursive foreign keys)
-* create **model** files from database table structure
+* create **model** files from database table structure (even foreign keys)
 * create **seed** files from database table content
 
 ## Installation
@@ -40,15 +40,17 @@ In Laravel 5 project add following lines to `app.php`:
 
 ## Usages
 
+**Note**: Generated files may need some autoformatting.
+
 ### Creating migration files
 
-The `db-exporter:migrate` commend is used for creating migration files from database. It has several options:
+The `db-exporter:migrate` command is used for creating migration files from database. It has several options:
 
 * **prefix** - database name prefix in migration files
 * **ignore** - array of ignored database table names
-* **database** - specify database connection name. If option is not set the default connection is used
+* **database** - specify database connection name (if option is not set the default connection is used)
 * **overwrite** - force overwriting existing migration files
-* **path** - output destination path relative to project root. Default is `database/migrations`
+* **path** - output destination path relative to project root (default is `database/migrations`)
 
 The example assumes following database tables:
 
@@ -71,6 +73,19 @@ YYYY-MM-DD_000002_create_pages_table.php
 ```
 
 **Note**: Table names and column names are converted to snake cased
+
+### Creating models
+
+The `db-exporter:models` command is used for creating models from database. It has several options:
+
+* **prefix** - database name prefix in migration files
+* **ignore** - array of ignored database table names
+* **database** - specify database connection name (if option is not set the default connection is used)
+* **overwrite** - force overwriting existing migration files
+* **namespace** - models namespace (default is `App\Models`)
+* **path** - output destination path relative to project root (default is `database/migrations`)
+
+**Note**: Some situation foreign methods can match, so manual checking is recommended.
 
 ## License
 
