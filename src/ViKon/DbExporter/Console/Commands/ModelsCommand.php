@@ -62,7 +62,49 @@ class ModelsCommand extends Command {
         }
 
         foreach ($tables as $table) {
-            $this->writeModelFile(studly_case(str_singular($table->getName(true))), snake_case($table->getName(true)));
+            foreach ($table->getForeignKeys() as $foreignKey) {
+                if (!isset($tables[$foreignKey->getForeignTableName()])) {
+                    continue;
+                }
+
+                $foreignTable = $tables[$foreignKey->getForeignTableName()];
+
+                $localIndex = $table->getIndexByColumn($foreignKey->getLocalColumns());
+                $foreignIndex = $table->getIndexByColumn($foreignKey->getForeignColumns());
+
+                $localTableClass = $this->option('namespace') . '\\' . studly_case($table->getName(true));
+                $foreignTableClass = $this->option('namespace') . '\\' . studly_case($foreignTable->getName(true));
+
+                $localMethodName = studly_case($table->getName());
+                $foreignMethodName = studly_case($foreignTable->getName());
+
+                $localColumn = $foreignKey->getLocalColumns();
+                $localColumn = reset($localColumn);
+                $foreignColumn = $foreignKey->getForeignColumns();
+                $foreignColumn = reset($foreignColumn);
+
+                // Try to find out connection type
+                if ($localIndex !== false && $foreignIndex !== false && $localIndex->isUnique() && $foreignIndex->isUnique()) {
+                    // One To One
+                    $table->addHasOneRelation($foreignTableClass, str_singular($foreignMethodName), $foreignColumn, $localColumn);
+                    $foreignTable->addBelongsToRelation($localTableClass, str_singular($localMethodName), $localColumn, $foreignColumn);
+                } elseif ($localIndex === false && $foreignIndex !== false && $foreignIndex->isUnique()) {
+                    // Many To One
+                    $table->addBelongsToRelation($foreignTableClass, str_singular($foreignMethodName), $foreignColumn, $localColumn);
+                    $foreignTable->addHasManyRelation($localTableClass, str_plural($localMethodName), $localColumn, $foreignColumn);
+                } elseif ($foreignIndex === false && $localIndex !== false && $localIndex->isUnique()) {
+                    // One To Many
+                    $table->addHasManyRelation($foreignTableClass, str_plural($foreignMethodName), $foreignColumn, $localColumn);
+                    $foreignTable->addBelongsToRelation($localTableClass, str_singular($localMethodName), $localColumn, $foreignColumn);
+                } else {
+                    // Many To Many without pivot table
+                }
+            }
+        }
+
+        foreach ($tables as $table) {
+            $foreignKeySource = $table->getRelationsSource();
+            $this->writeModelFile(studly_case(str_singular($table->getName(true))), snake_case($table->getName(true)), $foreignKeySource);
         }
 
         $this->info('Models successfully created');
@@ -87,15 +129,16 @@ class ModelsCommand extends Command {
     /**
      * Write model to file
      *
-     * @param string $className class name (and file names)
-     * @param string $tableName model's table name
+     * @param string $className   class name (and file names)
+     * @param string $tableName   model's table name
+     * @param string $foreignKeys rendered foreign keys
      */
-    protected function writeModelFile($className, $tableName) {
+    protected function writeModelFile($className, $tableName, $foreignKeys) {
         $this->writeToFileFromTemplate('model', $className . '.php', [
             '{{namespace}}'   => $this->option('namespace'),
             '{{className}}'   => $className,
             '{{tableName}}'   => $tableName,
-            '{{foreignKeys}}' => '',
+            '{{foreignKeys}}' => $foreignKeys,
         ]);
     }
 
