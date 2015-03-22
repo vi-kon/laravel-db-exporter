@@ -35,6 +35,31 @@ trait DatabaseHelper {
     }
 
     /**
+     * Get index by columns name
+     *
+     * @param string|string[] $columnsName columns name to match index columns
+     * @param string          $table       table name
+     * @param string|null     $name        database connection name (if null default connection is used)
+     *
+     * @return bool|\Doctrine\DBAL\Schema\Index
+     */
+    public function getTableIndexByColumn($columnsName, $table, $name = null) {
+        if (!is_array($columnsName)) {
+            $columnsName = [$columnsName];
+        }
+
+        $indexes = $this->getTableIndexes($table, $name);
+        foreach ($indexes as $index) {
+            // Check if columns are matched by index
+            if (count(array_intersect($index->getColumns(), $columnsName)) === count($columnsName)) {
+                return $index;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Get table columns information
      *
      * @param string      $table table name
@@ -89,8 +114,7 @@ trait DatabaseHelper {
 
         foreach ($columns as &$column) {
             $column = str_replace(['ID'], ['Id'], $column);
-            $column = snake_case($column);
-            $column = var_export($column, true);
+            $column = '\'' . snake_case($column) . '\'';
         }
 
         return $forceArray || count($columns) > 1 ? '[' . implode(', ', $columns) . ']' : reset($columns);

@@ -19,9 +19,8 @@ class DbExporterServiceProvider extends ServiceProvider {
      * @return void
      */
     public function register() {
-        $this->app->singleton('db-exporter.migration', 'ViKon\DbExporter\Migration');
-
         $this->commands('ViKon\DbExporter\Console\Commands\MigrateCommand');
+        $this->commands('ViKon\DbExporter\Console\Commands\ModelsCommand');
     }
 
     /**
