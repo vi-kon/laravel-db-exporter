@@ -5,7 +5,7 @@ namespace ViKon\DbExporter;
 
 use Doctrine\DBAL\Types\Type;
 
-class MigrateTable {
+class MigrationTable {
     use DatabaseHelper;
 
     const STATUS_INIT = 0;

@@ -22,7 +22,7 @@ class Migration {
     public function export($connectionName = null, array $options = []) {
         $tableNames = $this->getTableNames($connectionName);
 
-        /** @var \ViKon\DbExporter\MigrateTable[] $tables */
+        /** @var \ViKon\DbExporter\MigrationTable[] $tables */
         $tables = [];
 
         $tableOptions = [
@@ -34,7 +34,7 @@ class Migration {
                 continue;
             }
 
-            $tables[$tableName] = new MigrateTable($tableName, $connectionName, $tableOptions);
+            $tables[$tableName] = new MigrationTable($tableName, $connectionName, $tableOptions);
         }
 
         $index = 0;
@@ -42,7 +42,7 @@ class Migration {
             $this->createMigrationForTable($index, $tables, $table);
         }
         foreach ($tables as $table) {
-            if ($table->getStatus() === MigrateTable::STATUS_RECURSIVE_FOREIGN_KEY) {
+            if ($table->getStatus() === MigrationTable::STATUS_RECURSIVE_FOREIGN_KEY) {
                 $this->makeAddForeignKeysToTableMigrationFile($index, $table);
                 $index++;
             }
@@ -53,16 +53,16 @@ class Migration {
      * Export table to file
      *
      * @param int                              $index   file index
-     * @param \ViKon\DbExporter\MigrateTable[] $tables  available tables instances
-     * @param \ViKon\DbExporter\MigrateTable   $table   actual table instance files
+     * @param \ViKon\DbExporter\MigrationTable[] $tables  available tables instances
+     * @param \ViKon\DbExporter\MigrationTable   $table   actual table instance files
      * @param array                            $options options
      */
-    protected function createMigrationForTable(&$index, array $tables, MigrateTable $table, $options = []) {
-        if (in_array($table->getStatus(), [MigrateTable::STATUS_MIGRATED, MigrateTable::STATUS_RECURSIVE_FOREIGN_KEY])) {
+    protected function createMigrationForTable(&$index, array $tables, MigrationTable $table, $options = []) {
+        if (in_array($table->getStatus(), [MigrationTable::STATUS_MIGRATED, MigrationTable::STATUS_RECURSIVE_FOREIGN_KEY])) {
             return;
         }
 
-        $table->setStatus(MigrateTable::STATUS_IN_PROGRESS);
+        $table->setStatus(MigrationTable::STATUS_IN_PROGRESS);
 
         foreach ($table->getForeignTableNames() as $tableName) {
             if ($table->getName() === $tableName) {
@@ -70,8 +70,8 @@ class Migration {
             }
 
             // Check recursive foreign key
-            if ($tables[$tableName]->getStatus() === MigrateTable::STATUS_IN_PROGRESS) {
-                $table->setStatus(MigrateTable::STATUS_RECURSIVE_FOREIGN_KEY);
+            if ($tables[$tableName]->getStatus() === MigrationTable::STATUS_IN_PROGRESS) {
+                $table->setStatus(MigrationTable::STATUS_RECURSIVE_FOREIGN_KEY);
                 continue;
             }
 
@@ -80,8 +80,8 @@ class Migration {
 
         $this->makeCreateTableMigrationFile($index, $table, $options);
 
-        if ($table->getStatus() !== MigrateTable::STATUS_RECURSIVE_FOREIGN_KEY) {
-            $table->setStatus(MigrateTable::STATUS_MIGRATED);
+        if ($table->getStatus() !== MigrationTable::STATUS_RECURSIVE_FOREIGN_KEY) {
+            $table->setStatus(MigrationTable::STATUS_MIGRATED);
         }
 
         $index++;
@@ -91,16 +91,16 @@ class Migration {
      * Make Create{...}Table migration file
      *
      * @param int                            $index
-     * @param \ViKon\DbExporter\MigrateTable $table
+     * @param \ViKon\DbExporter\MigrationTable $table
      * @param array                          $options
      *
      * @throws \ViKon\DbExporter\DbExporterException
      */
-    protected function makeCreateTableMigrationFile($index, MigrateTable $table, $options = []) {
+    protected function makeCreateTableMigrationFile($index, MigrationTable $table, $options = []) {
         $up = 'Schema::create(\'' . snake_case($table->getName(true)) . '\', function(Blueprint $table) {' . "\n";
         $up .= $table->getColumnsSource();
         $up .= $table->getIndexesSource();
-        if ($table->getStatus() === MigrateTable::STATUS_IN_PROGRESS) {
+        if ($table->getStatus() === MigrationTable::STATUS_IN_PROGRESS) {
             $up .= $table->getForeignKeysSource();
         }
         $up .= '});';
@@ -119,10 +119,10 @@ class Migration {
      * Make AddForeignKeysTo{...}Table migration file
      *
      * @param int                            $index
-     * @param \ViKon\DbExporter\MigrateTable $table
+     * @param \ViKon\DbExporter\MigrationTable $table
      * @param array                          $options
      */
-    protected function makeAddForeignKeysToTableMigrationFile($index, MigrateTable $table, $options = []) {
+    protected function makeAddForeignKeysToTableMigrationFile($index, MigrationTable $table, $options = []) {
         $up = 'Schema::table(\'' . snake_case($table->getName(true)) . '\', function(Blueprint $table) {' . "\n";
         $up .= $table->getForeignKeysSource();
         $up .= '});';
