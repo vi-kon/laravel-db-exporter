@@ -45,7 +45,7 @@ class MigrationTable {
     }
 
     /**
-     * Get all foreign table names
+     * Get all foreign keys foreign table names
      *
      * @return array
      */
@@ -57,7 +57,7 @@ class MigrationTable {
             $foreignTableNames[] = $foreignKey->getForeignTableName();
         }
 
-        return $foreignTableNames;
+        return array_unique($foreignTableNames);
     }
 
     /**
@@ -218,7 +218,7 @@ class MigrationTable {
             $name = $this->serializeIndexName($foreignKey->getName());
             $localColumns = $this->serializeColumns($foreignKey->getLocalColumns());
             $foreignColumns = $this->serializeColumns($foreignKey->getForeignColumns());
-            $foreignTableName = var_export($this->tablePrefix . snake_case($foreignKey->getForeignTableName()), true);
+            $foreignTableName = '\'' . snake_case($this->tablePrefix . $foreignKey->getForeignTableName()) . '\'';
 
             $source .= "\n" . '$table->foreign(' . $localColumns . ', ' . $name . ')';
             $source .= "\n" . '      ->references(' . $foreignColumns . ')';
@@ -265,6 +265,6 @@ class MigrationTable {
 
         $name = str_replace(['ID'], ['Id'], $name);
 
-        return var_export(snake_case($name), true);
+        return '\'' . snake_case($name) . '\'';
     }
 }

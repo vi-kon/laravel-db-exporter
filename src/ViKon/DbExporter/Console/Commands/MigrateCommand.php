@@ -5,10 +5,11 @@ namespace ViKon\DbExporter\Console\Commands;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use ViKon\DbExporter\DatabaseHelper;
-use ViKon\DbExporter\MigrateTable;
+use ViKon\DbExporter\MigrationTable;
+use ViKon\DbExporter\TemplateHelper;
 
 class MigrateCommand extends Command {
-    use DatabaseHelper;
+    use DatabaseHelper, TemplateHelper;
 
     /**
      * The console command name.
@@ -39,21 +40,20 @@ class MigrateCommand extends Command {
     public function fire() {
         $this->info('Creating migration files from database...');
 
-        $tableNames = $this->getTableNames($this->option('database'));
-
-        /** @var \ViKon\DbExporter\MigrateTable[] $tables */
-        $tables = [];
-
         $tableOptions = [
             'tablePrefix' => $this->option('prefix'),
         ];
 
+        $tableNames = $this->getTableNames($this->option('database'));
+
+        /** @var \ViKon\DbExporter\MigrationTable[] $tables */
+        $tables = [];
         foreach ($tableNames as $tableName) {
             if (in_array($tableName, $this->option('ignore'))) {
                 continue;
             }
 
-            $tables[$tableName] = new MigrateTable($tableName, $this->option('database'), $tableOptions);
+            $tables[$tableName] = new MigrationTable($tableName, $this->option('database'), $tableOptions);
         }
 
         $index = 0;
@@ -61,13 +61,13 @@ class MigrateCommand extends Command {
             $this->createMigrationForTable($index, $tables, $table);
         }
         foreach ($tables as $table) {
-            if ($table->getStatus() === MigrateTable::STATUS_RECURSIVE_FOREIGN_KEY) {
+            if ($table->getStatus() === MigrationTable::STATUS_RECURSIVE_FOREIGN_KEY) {
                 $this->makeAddForeignKeysToTableMigrationFile($index, $table);
                 $index++;
             }
         }
 
-        $this->info('Migration files created');
+        $this->info('Migration files successfully created');
     }
 
     /**
@@ -88,25 +88,26 @@ class MigrateCommand extends Command {
     /**
      * Export table to file
      *
-     * @param int                              $index  file index
-     * @param \ViKon\DbExporter\MigrateTable[] $tables available tables instances
-     * @param \ViKon\DbExporter\MigrateTable   $table  actual table instance files
+     * @param int                                $index  file index
+     * @param \ViKon\DbExporter\MigrationTable[] $tables available tables instances
+     * @param \ViKon\DbExporter\MigrationTable   $table  actual table instance files
      */
-    protected function createMigrationForTable(&$index, array $tables, MigrateTable $table) {
-        if (in_array($table->getStatus(), [MigrateTable::STATUS_MIGRATED, MigrateTable::STATUS_RECURSIVE_FOREIGN_KEY])) {
+    protected function createMigrationForTable(&$index, array $tables, MigrationTable $table) {
+        if (in_array($table->getStatus(), [MigrationTable::STATUS_MIGRATED, MigrationTable::STATUS_RECURSIVE_FOREIGN_KEY])) {
             return;
         }
 
-        $table->setStatus(MigrateTable::STATUS_IN_PROGRESS);
+        $table->setStatus(MigrationTable::STATUS_IN_PROGRESS);
 
+        // Check foreign keys
         foreach ($table->getForeignTableNames() as $tableName) {
             if ($table->getName() === $tableName) {
                 continue;
             }
 
             // Check recursive foreign key
-            if ($tables[$tableName]->getStatus() === MigrateTable::STATUS_IN_PROGRESS) {
-                $table->setStatus(MigrateTable::STATUS_RECURSIVE_FOREIGN_KEY);
+            if (isset($tables[$tableName]) && $tables[$tableName]->getStatus() === MigrationTable::STATUS_IN_PROGRESS) {
+                $table->setStatus(MigrationTable::STATUS_RECURSIVE_FOREIGN_KEY);
                 continue;
             }
 
@@ -115,8 +116,8 @@ class MigrateCommand extends Command {
 
         $this->makeCreateTableMigrationFile($index, $table);
 
-        if ($table->getStatus() !== MigrateTable::STATUS_RECURSIVE_FOREIGN_KEY) {
-            $table->setStatus(MigrateTable::STATUS_MIGRATED);
+        if ($table->getStatus() !== MigrationTable::STATUS_RECURSIVE_FOREIGN_KEY) {
+            $table->setStatus(MigrationTable::STATUS_MIGRATED);
         }
 
         $index++;
@@ -125,16 +126,16 @@ class MigrateCommand extends Command {
     /**
      * Make Create{...}Table migration file
      *
-     * @param int                            $index
-     * @param \ViKon\DbExporter\MigrateTable $table
+     * @param int                              $index
+     * @param \ViKon\DbExporter\MigrationTable $table
      *
      * @throws \ViKon\DbExporter\DbExporterException
      */
-    protected function makeCreateTableMigrationFile($index, MigrateTable $table) {
+    protected function makeCreateTableMigrationFile($index, MigrationTable $table) {
         $up = 'Schema::create(\'' . snake_case($table->getName(true)) . '\', function(Blueprint $table) {' . "\n";
         $up .= $table->getColumnsSource();
         $up .= $table->getIndexesSource();
-        if ($table->getStatus() === MigrateTable::STATUS_IN_PROGRESS) {
+        if ($table->getStatus() === MigrationTable::STATUS_IN_PROGRESS) {
             $up .= $table->getForeignKeysSource();
         }
         $up .= '});';
@@ -144,16 +145,16 @@ class MigrateCommand extends Command {
         $prefix = date('Y_m_d') . '_' . str_pad($index, 6, '0', STR_PAD_LEFT);
         $fileName = $prefix . '_create_' . snake_case($table->getName(true)) . '_table.php';
 
-        $this->writeTemplate($fileName, 'Create' . studly_case($table->getName(true)) . 'Table', $up, $down);
+        $this->writeMigrationFile($fileName, 'Create' . studly_case($table->getName(true)) . 'Table', $up, $down);
     }
 
     /**
      * Make AddForeignKeysTo{...}Table migration file
      *
-     * @param int                            $index
-     * @param \ViKon\DbExporter\MigrateTable $table
+     * @param int                              $index
+     * @param \ViKon\DbExporter\MigrationTable $table
      */
-    protected function makeAddForeignKeysToTableMigrationFile($index, MigrateTable $table) {
+    protected function makeAddForeignKeysToTableMigrationFile($index, MigrationTable $table) {
         $up = 'Schema::table(\'' . snake_case($table->getName(true)) . '\', function(Blueprint $table) {' . "\n";
         $up .= $table->getForeignKeysSource();
         $up .= '});';
@@ -165,35 +166,23 @@ class MigrateCommand extends Command {
         $prefix = date('Y_m_d') . '_' . str_pad($index, 6, '0', STR_PAD_LEFT);
         $fileName = $prefix . '_add_foreign_keys_to_' . snake_case($table->getName(true)) . '_table.php';
 
-        $this->writeTemplate($fileName, 'AddForeignKeysTo' . studly_case($table->getName(true)) . 'Table', $up, $down);
+        $this->writeMigrationFile($fileName, 'AddForeignKeysTo' . studly_case($table->getName(true)) . 'Table', $up, $down);
     }
 
     /**
-     * Write template to file
+     * Write migration to file
      *
      * @param string $fileName   migration file name
      * @param string $className  migration class name
      * @param string $upMethod   migration class up method content
      * @param string $downMethod migration class down method content
      */
-    protected function writeTemplate($fileName, $className, $upMethod, $downMethod) {
-        $path = base_path(config('path') . '/' . $fileName);
-
-        if ($this->option('overwrite') || !file_exists($path) && !is_dir($path)) {
-            $variables = [
-                '{{className}}' => $className,
-                '{{up}}'        => $upMethod,
-                '{{down}}'      => $downMethod,
-            ];
-
-            $template = file_get_contents(__DIR__ . '/../../../../stub/migration');
-            $template = str_replace(array_keys($variables), array_values($variables), $template);
-
-            file_put_contents($path, $template);
-            $this->output->writeln('<info>File created:</info> ' . $fileName);
-        } else {
-            $this->output->writeln('<info>File already exists:</info> ' . $fileName . ' <comment>(Overwrite disabled)</comment>');
-        }
+    protected function writeMigrationFile($fileName, $className, $upMethod, $downMethod) {
+        $this->writeToFileFromTemplate('migration', $fileName, [
+            '{{className}}' => $className,
+            '{{up}}'        => $upMethod,
+            '{{down}}'      => $downMethod,
+        ]);
     }
 
 }
