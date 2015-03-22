@@ -81,6 +81,7 @@ class MigrateCommand extends Command {
             ['ignore', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Ignore specified database tables', ['migrations']],
             ['database', null, InputOption::VALUE_OPTIONAL, 'Specify database name'],
             ['overwrite', null, InputOption::VALUE_NONE, 'Overwrite exists migration files'],
+            ['path', null, InputOption::VALUE_OPTIONAL, 'Output destination path relative to project root', 'database/migrations'],
         ];
     }
 
@@ -176,7 +177,7 @@ class MigrateCommand extends Command {
      * @param string $downMethod migration class down method content
      */
     protected function writeTemplate($fileName, $className, $upMethod, $downMethod) {
-        $path = base_path('database/migrations/' . $fileName);
+        $path = base_path(config('path') . '/' . $fileName);
 
         if ($this->option('overwrite') || !file_exists($path) && !is_dir($path)) {
             $variables = [

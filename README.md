@@ -48,6 +48,7 @@ The `db-exporter:migrate` commend is used for creating migration files from data
 * **ignore** - array of ignored database table names
 * **database** - specify database connection name. If option is not set the default connection is used
 * **overwrite** - force overwriting existing migration files
+* **path** - output destination path relative to project root. Default is `database/migrations`
 
 The example assumes following database tables:
 
@@ -61,13 +62,15 @@ Exports all tables from default database:
 php artisan db-exporter:migrate
 ```
 
-The above command will generate following files to `database/migrations` directory:
+The above command will generate following files into `database/migrations` directory:
 
 ```bash
 YYYY-MM-DD_000000_create_users_table.php
 YYYY-MM-DD_000001_create_groups_table.php
 YYYY-MM-DD_000002_create_pages_table.php
 ```
+
+**Note**: Table names and column names are converted to snake cased
 
 ## License
 
