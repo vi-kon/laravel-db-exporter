@@ -16,6 +16,9 @@ This is database table structure and data exporter to migration and seed files f
 * create **model** files from database table structure (even foreign keys)
 * create **seed** files from database table content
 
+---
+[Back to top][top]
+
 ## Installation
 
 To `composer.json` file add following lines:
@@ -37,6 +40,9 @@ In Laravel 5 project add following lines to `app.php`:
 // to providers array
 'ViKon\DbExporter\DbExporterServiceProvider',
 ```
+
+---
+[Back to top][top]
 
 ## Usages
 
@@ -74,6 +80,9 @@ YYYY-MM-DD_000002_create_pages_table.php
 
 **Note**: Table names and column names are converted to snake cased
 
+---
+[Back to top][top]
+
 ### Creating models
 
 The `db-exporter:models` command is used for creating models from database. It has several options:
@@ -86,6 +95,9 @@ The `db-exporter:models` command is used for creating models from database. It h
 * **path** - output destination path relative to project root (default is `database/migrations`)
 
 **Note**: Some situation foreign methods can match, so manual checking is recommended.
+
+---
+[Back to top][top]
 
 ## License
 
