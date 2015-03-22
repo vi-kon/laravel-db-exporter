@@ -94,7 +94,13 @@ The `db-exporter:models` command is used for creating models from database. It h
 * **namespace** - models namespace (default is `App\Models`)
 * **path** - output destination path relative to project root (default is `database/migrations`)
 
-**Note**: Some situation foreign methods can match, so manual checking is recommended.
+**Note**: Some situation foreign methods name can match in models, so manual renaming is needed.
+
+Creating models from default database:
+
+```bash
+php artisan db-exporter:models
+```
 
 ---
 [Back to top][top]
