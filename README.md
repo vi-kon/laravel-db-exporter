@@ -96,6 +96,8 @@ The `db-exporter:models` command is used for creating models from database. It h
 
 **Note**: Some situation foreign methods name can match in models, so manual renaming is needed.
 
+**Note**: In some cases relation guess (One to One, Many to One, One to Many) not working correctly.
+
 Creating models from default database:
 
 ```bash

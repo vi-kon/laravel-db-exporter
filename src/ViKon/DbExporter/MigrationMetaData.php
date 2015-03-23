@@ -5,7 +5,7 @@ namespace ViKon\DbExporter;
 
 use Doctrine\DBAL\Types\Type;
 
-class MigrationTable {
+class MigrationMetaData {
     use DatabaseHelper;
 
     const STATUS_INIT = 0;
@@ -128,6 +128,7 @@ class MigrationTable {
                     break;
 
                 case Type::BOOLEAN:
+                    var_dump($column->getPrecision());
                     $method = 'boolean';
                     break;
 

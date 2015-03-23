@@ -3,7 +3,7 @@
 namespace ViKon\DbExporter;
 
 
-class ModelTable {
+class ModelMetaData {
     use DatabaseHelper;
 
     /** @var string */
@@ -12,20 +12,33 @@ class ModelTable {
     /** @var string */
     protected $connectionName;
 
+    /** @var string */
+    protected $namespace;
+
     /** @var mixed[] */
     protected $relations = [];
 
     /**
-     * @param string $name           table name
+     * @param string $name           table name (class name)
      * @param string $connectionName connection name
-     * @param array  $options        array of options
+     * @param string $namespace      class namespace
+     * @param string $tablePrefix    table prefix
      */
-    public function __construct($name, $connectionName, array $options = []) {
+    public function __construct($name, $connectionName, $namespace, $tablePrefix = '') {
         $this->name = $name;
         $this->connectionName = $connectionName;
-        $this->tablePrefix = isset($options['tablePrefix']) ? $options['tablePrefix'] . '__' : '';
+        $this->namespace = $namespace;
+        $this->tablePrefix = $tablePrefix === '' ? $tablePrefix . '__' : '';
     }
 
+    /**
+     * Add hasOne relation
+     *
+     * @param string $class      foreign class name
+     * @param string $method     class method name
+     * @param string $foreignKey foreign column name
+     * @param string $localKey   local column name
+     */
     public function addHasOneRelation($class, $method, $foreignKey, $localKey) {
         $this->relations[$localKey] = [
             'type'       => 'hasOne',
@@ -35,6 +48,14 @@ class ModelTable {
         ];
     }
 
+    /**
+     * Add belongsTo relation
+     *
+     * @param string $class     foreign class name
+     * @param string $method    class method name
+     * @param string $parentKey foreign column name
+     * @param string $localKey  local column name
+     */
     public function addBelongsToRelation($class, $method, $localKey, $parentKey) {
         $this->relations[$localKey] = [
             'type'      => 'belongsTo',
@@ -44,6 +65,14 @@ class ModelTable {
         ];
     }
 
+    /**
+     * Add hasMany relation
+     *
+     * @param string $class      foreign class name
+     * @param string $method     class method name
+     * @param string $foreignKey foreign column name
+     * @param string $localKey   local column name
+     */
     public function addHasManyRelation($class, $method, $foreignKey, $localKey) {
         $this->relations[$localKey] = [
             'type'       => 'hasManyRelation',
@@ -53,6 +82,11 @@ class ModelTable {
         ];
     }
 
+    /**
+     * Get relations source
+     *
+     * @return string
+     */
     public function getRelationsSource() {
         $source = '';
         foreach ($this->relations as $localKey => $relation) {
@@ -76,6 +110,17 @@ class ModelTable {
         }
 
         return $source;
+    }
+
+    /**
+     * Get table class
+     *
+     * @param bool $namespace if TRUE prepend namespace, otherwise return class name
+     *
+     * @return string
+     */
+    public function getClass($namespace = true) {
+        return ($namespace ? $this->namespace . '\\' : '') . str_singular(studly_case($this->getName(true)));
     }
 
     /**

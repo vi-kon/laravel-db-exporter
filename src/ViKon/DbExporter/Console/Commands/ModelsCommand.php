@@ -5,16 +5,11 @@ namespace ViKon\DbExporter\Console\Commands;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use ViKon\DbExporter\DatabaseHelper;
-use ViKon\DbExporter\ModelTable;
+use ViKon\DbExporter\ModelMetaData;
 use ViKon\DbExporter\TemplateHelper;
 
 class ModelsCommand extends Command {
     use DatabaseHelper, TemplateHelper;
-
-    const TYPE_ONE_TO_ONE = 1;
-    const TYPE_MANY_TO_ONE = 2;
-    const TYPE_ONE_TO_MANY = 3;
-    const TYPE_MANY_TO_MANY = 4;
 
     /**
      * The console command name.
@@ -45,22 +40,42 @@ class ModelsCommand extends Command {
     public function fire() {
         $this->info('Creating models from database...');
 
-        $tableOptions = [
-            'tablePrefix' => $this->option('prefix'),
-        ];
+        $tables = $this->makeMetaData();
 
+        $this->makeRelations($tables);
+
+        foreach ($tables as $table) {
+            $foreignKeySource = $table->getRelationsSource();
+            $this->writeModelFile($table->getClass(false), snake_case($table->getName(true)), $foreignKeySource);
+        }
+
+        $this->info('Models successfully created');
+    }
+
+    /**
+     * Build up meta data
+     *
+     * @return \ViKon\DbExporter\ModelMetaData[]
+     */
+    protected function makeMetaData() {
         $tableNames = $this->getTableNames($this->option('database'));
 
-        /** @var \ViKon\DbExporter\ModelTable[] $tables */
         $tables = [];
         foreach ($tableNames as $tableName) {
             if (in_array($tableName, $this->option('ignore'))) {
                 continue;
             }
 
-            $tables[$tableName] = new ModelTable($tableName, $this->option('database'), $tableOptions);
+            $tables[$tableName] = new ModelMetaData($tableName, $this->option('database'), $this->option('namespace'), $this->option('prefix'));
         }
 
+        return $tables;
+    }
+
+    /**
+     * @param \ViKon\DbExporter\ModelMetaData[] $tables
+     */
+    protected function makeRelations(array $tables) {
         foreach ($tables as $table) {
             foreach ($table->getForeignKeys() as $foreignKey) {
                 if (!isset($tables[$foreignKey->getForeignTableName()])) {
@@ -70,18 +85,18 @@ class ModelsCommand extends Command {
                 $foreignTable = $tables[$foreignKey->getForeignTableName()];
 
                 $localIndex = $table->getIndexByColumn($foreignKey->getLocalColumns());
-                $foreignIndex = $table->getIndexByColumn($foreignKey->getForeignColumns());
+                $foreignIndex = $foreignTable->getIndexByColumn($foreignKey->getForeignColumns());
 
-                $localTableClass = $this->option('namespace') . '\\' . studly_case($table->getName(true));
-                $foreignTableClass = $this->option('namespace') . '\\' . studly_case($foreignTable->getName(true));
-
-                $localMethodName = studly_case($table->getName());
-                $foreignMethodName = studly_case($foreignTable->getName());
+                $localTableClass = $table->getClass();
+                $foreignTableClass = $foreignTable->getClass();
 
                 $localColumn = $foreignKey->getLocalColumns();
                 $localColumn = reset($localColumn);
                 $foreignColumn = $foreignKey->getForeignColumns();
                 $foreignColumn = reset($foreignColumn);
+
+                $localMethodName = str_replace(['Id'], '', camel_case($foreignColumn));
+                $foreignMethodName = str_replace(['Id'], '', camel_case($localColumn));
 
                 // Try to find out connection type
                 if ($localIndex !== false && $foreignIndex !== false && $localIndex->isUnique() && $foreignIndex->isUnique()) {
@@ -98,16 +113,11 @@ class ModelsCommand extends Command {
                     $foreignTable->addBelongsToRelation($localTableClass, str_singular($localMethodName), $localColumn, $foreignColumn);
                 } else {
                     // Many To Many without pivot table
+                    $table->addHasManyRelation($foreignTableClass, str_plural($foreignMethodName), $foreignColumn, $localColumn);
+                    $foreignTable->addHasManyRelation($localTableClass, str_plural($localMethodName), $localColumn, $foreignColumn);
                 }
             }
         }
-
-        foreach ($tables as $table) {
-            $foreignKeySource = $table->getRelationsSource();
-            $this->writeModelFile(studly_case(str_singular($table->getName(true))), snake_case($table->getName(true)), $foreignKeySource);
-        }
-
-        $this->info('Models successfully created');
     }
 
     /**
