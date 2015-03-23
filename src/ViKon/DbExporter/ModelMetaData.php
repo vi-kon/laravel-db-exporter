@@ -95,15 +95,15 @@ class ModelMetaData {
             switch ($relation['type']) {
                 case 'hasOne':
                     $foreignKey = $relation['foreignKey'];
-                    $source .= "\n" . '    $this->hasOne(\'' . $class . '\', \'' . $foreignKey . '\', \'' . $localKey . '\');';
+                    $source .= "\n" . '    return $this->hasOne(\'' . $class . '\', \'' . $foreignKey . '\', \'' . $localKey . '\');';
                     break;
                 case 'belongsTo':
                     $parentKey = $relation['parentKey'];
-                    $source .= "\n" . '    $this->belongsTo(\'' . $class . '\', \'' . $localKey . '\', \'' . $parentKey . '\');';
+                    $source .= "\n" . '    return $this->belongsTo(\'' . $class . '\', \'' . $localKey . '\', \'' . $parentKey . '\');';
                     break;
                 case 'hasManyRelation':
                     $foreignKey = $relation['foreignKey'];
-                    $source .= "\n" . '    $this->hasMany(\'' . $class . '\', \'' . $foreignKey . '\', \'' . $localKey . '\');';
+                    $source .= "\n" . '    return $this->hasMany(\'' . $class . '\', \'' . $foreignKey . '\', \'' . $localKey . '\');';
                     break;
             }
             $source .= "\n" . '}';
