@@ -95,26 +95,27 @@ class ModelsCommand extends Command {
                 $foreignColumn = $foreignKey->getForeignColumns();
                 $foreignColumn = reset($foreignColumn);
 
-                $localMethodName = str_replace(['Id'], '', camel_case($foreignColumn));
-                $foreignMethodName = str_replace(['Id'], '', camel_case($localColumn));
+                // Guess foreign method name
+                $localMethodName = str_replace(['_id'], '', snake_case($foreignColumn));
+                $foreignMethodName = str_replace(['_id'], '', snake_case($localColumn));
 
                 // Try to find out connection type
                 if ($localIndex !== false && $foreignIndex !== false && $localIndex->isUnique() && $foreignIndex->isUnique()) {
                     // One To One
-                    $table->addHasOneRelation($foreignTableClass, str_singular($foreignMethodName), $foreignColumn, $localColumn);
-                    $foreignTable->addBelongsToRelation($localTableClass, str_singular($localMethodName), $localColumn, $foreignColumn);
+                    $table->addHasOneRelation($foreignTableClass, $foreignMethodName, $foreignColumn, $localColumn);
+                    $foreignTable->addBelongsToRelation($localTableClass, $foreignMethodName, $localColumn, $foreignColumn);
                 } elseif ($localIndex === false && $foreignIndex !== false && $foreignIndex->isUnique()) {
                     // Many To One
-                    $table->addBelongsToRelation($foreignTableClass, str_singular($foreignMethodName), $foreignColumn, $localColumn);
-                    $foreignTable->addHasManyRelation($localTableClass, str_plural($localMethodName), $localColumn, $foreignColumn);
+                    $table->addBelongsToRelation($foreignTableClass, $foreignMethodName, $foreignColumn, $localColumn);
+                    $foreignTable->addHasManyRelation($localTableClass, $localMethodName, $localColumn, $foreignColumn);
                 } elseif ($foreignIndex === false && $localIndex !== false && $localIndex->isUnique()) {
                     // One To Many
-                    $table->addHasManyRelation($foreignTableClass, str_plural($foreignMethodName), $foreignColumn, $localColumn);
-                    $foreignTable->addBelongsToRelation($localTableClass, str_singular($localMethodName), $localColumn, $foreignColumn);
+                    $table->addHasManyRelation($foreignTableClass, $foreignMethodName, $foreignColumn, $localColumn);
+                    $foreignTable->addBelongsToRelation($localTableClass, $localMethodName, $localColumn, $foreignColumn);
                 } else {
                     // Many To Many without pivot table
-                    $table->addHasManyRelation($foreignTableClass, str_plural($foreignMethodName), $foreignColumn, $localColumn);
-                    $foreignTable->addHasManyRelation($localTableClass, str_plural($localMethodName), $localColumn, $foreignColumn);
+                    $table->addHasManyRelation($foreignTableClass, $foreignMethodName, $foreignColumn, $localColumn);
+                    $foreignTable->addHasManyRelation($localTableClass, $table->getName(), $localColumn, $foreignColumn);
                 }
             }
         }

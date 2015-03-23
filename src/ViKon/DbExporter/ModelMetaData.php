@@ -43,7 +43,7 @@ class ModelMetaData {
         $this->relations[$localKey] = [
             'type'       => 'hasOne',
             'class'      => $class,
-            'method'     => $method,
+            'method'     => str_singular($method),
             'foreignKey' => $foreignKey,
         ];
     }
@@ -60,7 +60,7 @@ class ModelMetaData {
         $this->relations[$localKey] = [
             'type'      => 'belongsTo',
             'class'     => $class,
-            'method'    => $method,
+            'method'    => str_singular($method),
             'parentKey' => $parentKey,
         ];
     }
@@ -77,7 +77,7 @@ class ModelMetaData {
         $this->relations[$localKey] = [
             'type'       => 'hasManyRelation',
             'class'      => $class,
-            'method'     => $method,
+            'method'     => str_plural($method),
             'foreignKey' => $foreignKey,
         ];
     }
@@ -91,7 +91,7 @@ class ModelMetaData {
         $source = '';
         foreach ($this->relations as $localKey => $relation) {
             $class = $relation['class'];
-            $source .= "\n" . 'public function ' . $relation['method'] . '() {';
+            $source .= "\n" . 'public function ' . camel_case($relation['method']) . '() {';
             switch ($relation['type']) {
                 case 'hasOne':
                     $foreignKey = $relation['foreignKey'];
