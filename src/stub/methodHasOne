@@ -1,0 +1,6 @@
+/**
+ * @return \Illuminate\Database\Eloquent\Relations\HasOne
+ */
+public function {{methodName}}() {
+    return $this->hasOne('{{className}}', '{{foreignColumn}}', '{{localColumn}}');
+}

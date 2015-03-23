@@ -1,0 +1,6 @@
+/**
+ * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+ */
+public function {{methodName}}() {
+    return $this->belongsTo('{{className}}', '{{localColumn}}', '{{parentColumn}}');
+}

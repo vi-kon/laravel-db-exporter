@@ -1,0 +1,6 @@
+/**
+ * @return \Illuminate\Database\Eloquent\Relations\HasMany
+ */
+public function {{methodName}}() {
+    return $this->hasMany('{{className}}', '{{foreignColumn}}', '{{localColumn}}');
+}

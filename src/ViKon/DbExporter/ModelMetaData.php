@@ -4,7 +4,7 @@ namespace ViKon\DbExporter;
 
 
 class ModelMetaData {
-    use DatabaseHelper;
+    use DatabaseHelper, TemplateHelper;
 
     /** @var string */
     protected $name;
@@ -89,24 +89,39 @@ class ModelMetaData {
      */
     public function getRelationsSource() {
         $source = '';
-        foreach ($this->relations as $localKey => $relation) {
+        foreach ($this->relations as $localColumn => $relation) {
             $class = $relation['class'];
-            $source .= "\n" . 'public function ' . camel_case($relation['method']) . '() {';
+            $method = camel_case($relation['method']);
             switch ($relation['type']) {
                 case 'hasOne':
-                    $foreignKey = $relation['foreignKey'];
-                    $source .= "\n" . '    return $this->hasOne(\'' . $class . '\', \'' . $foreignKey . '\', \'' . $localKey . '\');';
+                    $foreignColumn = $relation['foreignKey'];
+                    $source .= $this->renderTemplate('methodHasOne', [
+                        '{{className}}'     => $class,
+                        '{{methodName}}'    => $method,
+                        '{{foreignColumn}}' => $foreignColumn,
+                        '{{localColumn}}'   => $localColumn,
+                    ]);
                     break;
                 case 'belongsTo':
-                    $parentKey = $relation['parentKey'];
-                    $source .= "\n" . '    return $this->belongsTo(\'' . $class . '\', \'' . $localKey . '\', \'' . $parentKey . '\');';
+                    $parentColumn = $relation['parentKey'];
+                    $source .= $this->renderTemplate('methodBelongsTo', [
+                        '{{className}}'    => $class,
+                        '{{methodName}}'   => $method,
+                        '{{parentColumn}}' => $parentColumn,
+                        '{{localColumn}}'  => $localColumn,
+
+                    ]);
                     break;
                 case 'hasManyRelation':
-                    $foreignKey = $relation['foreignKey'];
-                    $source .= "\n" . '    return $this->hasMany(\'' . $class . '\', \'' . $foreignKey . '\', \'' . $localKey . '\');';
+                    $foreignColumn = $relation['foreignKey'];
+                    $source .= $this->renderTemplate('methodHasMany', [
+                        '{{className}}'     => $class,
+                        '{{methodName}}'    => $method,
+                        '{{foreignColumn}}' => $foreignColumn,
+                        '{{localColumn}}'   => $localColumn,
+                    ]);
                     break;
             }
-            $source .= "\n" . '}';
         }
 
         return $source;
