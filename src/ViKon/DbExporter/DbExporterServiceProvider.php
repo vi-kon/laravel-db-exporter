@@ -13,6 +13,18 @@ use Illuminate\Support\ServiceProvider;
  */
 class DbExporterServiceProvider extends ServiceProvider {
 
+
+    /**
+     * Bootstrap the application events.
+     *
+     * @return void
+     */
+    public function boot() {
+        $this->publishes([
+            __DIR__ . '/../../config/config.php' => config_path('db-exporter.php'),
+        ], 'config');
+    }
+
     /**
      * Register the service provider.
      *
@@ -21,6 +33,8 @@ class DbExporterServiceProvider extends ServiceProvider {
     public function register() {
         $this->commands('ViKon\DbExporter\Console\Commands\MigrateCommand');
         $this->commands('ViKon\DbExporter\Console\Commands\ModelsCommand');
+
+        $this->mergeConfigFrom(__DIR__ . '/../../config/config.php', 'db-exporter');
     }
 
     /**
@@ -29,6 +43,6 @@ class DbExporterServiceProvider extends ServiceProvider {
      * @return array
      */
     public function provides() {
-        return ['db-exporter.migration'];
+        return [];
     }
 }

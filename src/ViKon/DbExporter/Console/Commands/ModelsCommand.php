@@ -128,12 +128,13 @@ class ModelsCommand extends Command {
      */
     protected function getOptions() {
         return [
-            ['prefix', null, InputOption::VALUE_OPTIONAL, 'Table prefix in models'],
-            ['ignore', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Ignore specified database tables', ['migrations']],
-            ['database', null, InputOption::VALUE_OPTIONAL, 'Specify database name'],
+            ['prefix', null, InputOption::VALUE_OPTIONAL, 'Table prefix in models', config('db-exporter.prefix')],
+            ['select', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Select specified database tables only', config('db-exporter.select')],
+            ['ignore', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Ignore specified database tables', config('db-exporter.ignore')],
+            ['database', null, InputOption::VALUE_OPTIONAL, 'Specify database name', config('db-exporter.database')],
             ['overwrite', null, InputOption::VALUE_NONE, 'Overwrite exists models'],
-            ['namespace', null, InputOption::VALUE_OPTIONAL, 'Models namespace', 'App\Models'],
-            ['path', null, InputOption::VALUE_OPTIONAL, 'Output destination path relative to project root', 'app/Models'],
+            ['namespace', null, InputOption::VALUE_OPTIONAL, 'Models base namespace', config('db-exporter.model.namespace')],
+            ['path', null, InputOption::VALUE_OPTIONAL, 'Output destination path relative to project root', config('db-exporter.model.path')],
         ];
     }
 

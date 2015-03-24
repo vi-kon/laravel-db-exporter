@@ -77,20 +77,21 @@ class MigrateCommand extends Command {
      */
     protected function getOptions() {
         return [
-            ['prefix', null, InputOption::VALUE_OPTIONAL, 'Table prefix in migration files'],
-            ['ignore', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Ignore specified database tables', ['migrations']],
-            ['database', null, InputOption::VALUE_OPTIONAL, 'Specify database name'],
+            ['prefix', null, InputOption::VALUE_OPTIONAL, 'Table prefix in migration files', config('db-exporter.prefix')],
+            ['select', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Select specified database tables only', config('db-exporter.select')],
+            ['ignore', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Ignore specified database tables', config('db-exporter.ignore')],
+            ['database', null, InputOption::VALUE_OPTIONAL, 'Specify database name', config('db-exporter.database')],
             ['overwrite', null, InputOption::VALUE_NONE, 'Overwrite exists migration files'],
-            ['path', null, InputOption::VALUE_OPTIONAL, 'Output destination path relative to project root', 'database/migrations'],
+            ['path', null, InputOption::VALUE_OPTIONAL, 'Output destination path relative to project root', config('db-exporter.migration.path')],
         ];
     }
 
     /**
      * Export table to file
      *
-     * @param int                                $index  file index
-     * @param \ViKon\DbExporter\MigrationMetaData[] $tables available tables instances
-     * @param \ViKon\DbExporter\MigrationMetaData   $table  actual table instance files
+     * @param int                                   $index  file index
+     * @param \ViKon\DbExporter\Meta\MigrationMetaData[] $tables available tables instances
+     * @param \ViKon\DbExporter\Meta\MigrationMetaData   $table  actual table instance files
      */
     protected function createMigrationForTable(&$index, array $tables, MigrationMetaData $table) {
         if (in_array($table->getStatus(), [MigrationMetaData::STATUS_MIGRATED, MigrationMetaData::STATUS_RECURSIVE_FOREIGN_KEY])) {
