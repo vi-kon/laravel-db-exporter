@@ -88,8 +88,9 @@ YYYY-MM-DD_000002_create_pages_table.php
 The `db-exporter:models` command is used for creating models from database. It has several options:
 
 * **prefix** - database name prefix in migration files
+* **select** - array of ignored database table names (if set `ignore` option is ignored)
 * **ignore** - array of ignored database table names
-* **database** - specify database connection name (if option is not set the default connection is used)
+* **connection** - specify database connection name (if option is not set the default connection is used)
 * **overwrite** - force overwriting existing migration files
 * **namespace** - models namespace (default is `App\Models`)
 * **path** - output destination path relative to project root (default is `database/migrations`)

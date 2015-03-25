@@ -3,13 +3,13 @@
 return [
     /*
     | --------------------------------------------------------------------------
-    | Default database (connection name)
+    | Default connection name
     | --------------------------------------------------------------------------
     | Database connection name. Valid connection names are defined in
     | database.php. If value is null default connection is used.
     |
     */
-    'database'  => null,
+    'connection' => null,
 
     /*
     | --------------------------------------------------------------------------
@@ -19,7 +19,7 @@ return [
     | models.
     |
     */
-    'prefix'    => '',
+    'prefix'     => '',
 
     /*
     | --------------------------------------------------------------------------
@@ -29,7 +29,7 @@ return [
     | together. In commands with --select option can add another tables.
     |
     */
-    'select'    => [],
+    'select'     => [],
 
     /*
     | --------------------------------------------------------------------------
@@ -39,7 +39,7 @@ return [
     | In commands with --ignore option can add another tables.
     |
     */
-    'ignore'    => [
+    'ignore'     => [
         'migrations',
     ],
 
@@ -48,7 +48,7 @@ return [
     | Model options
     | --------------------------------------------------------------------------
     */
-    'model'     => [
+    'model'      => [
         /*
         | --------------------------------------------------------------------------
         | Default namespace
@@ -82,16 +82,115 @@ return [
         | * className    - array containing pattern and replacement for preg_match
         |                  to generate models class name from table name. If value
         |                  is null original table name is used. The result is camel
-        |                  cased.
+        |                  cased. The subject table name is snake cased
         |
         */
         'map'       => [
+//            [
+//                'tablePattern' => '.*',
+//                'namespace'    => 'App\Models',
+//                'path'         => 'app/Models',
+//                'className'    => [
+//                    'pattern'     => '',
+//                    'replacement' => '',
+//                ],
+//            ],
             [
-                'tablePattern' => '.*',
-                'namespace'    => 'App\\Models',
-                'path'         => 'app/Models',
+                'tablePattern' => '^agt_',
+                'namespace'    => 'App\Models\Agent',
+                'path'         => 'app/Models/Agent',
                 'className'    => [
-                    'pattern'     => '',
+                    'pattern'     => '^agt_',
+                    'replacement' => '',
+                ],
+            ],
+            [
+                'tablePattern' => '^chr_',
+                'namespace'    => 'App\Models\Character',
+                'path'         => 'app/Models/Character',
+                'className'    => [
+                    'pattern'     => '^chr_',
+                    'replacement' => '',
+                ],
+            ],
+            [
+                'tablePattern' => '^crp_',
+                'namespace'    => 'App\Models\Corporation',
+                'path'         => 'app/Models/Corporation',
+                'className'    => [
+                    'pattern'     => '^crp_',
+                    'replacement' => '',
+                ],
+            ],
+            [
+                'tablePattern' => '^dgm_',
+                'namespace'    => 'App\Models\Damage',
+                'path'         => 'app/Models/Damage',
+                'className'    => [
+                    'pattern'     => '^dgm_',
+                    'replacement' => '',
+                ],
+            ],
+            [
+                'tablePattern' => '^inv_',
+                'namespace'    => 'App\Models\Inventory',
+                'path'         => 'app/Models/Invenroty',
+                'className'    => [
+                    'pattern'     => '^inv_',
+                    'replacement' => '',
+                ],
+            ],
+            [
+                'tablePattern' => '^map_',
+                'namespace'    => 'App\Models\Map',
+                'path'         => 'app/Models/Map',
+                'className'    => [
+                    'pattern'     => '^map_',
+                    'replacement' => '',
+                ],
+            ],
+            [
+                'tablePattern' => '^ram_',
+                'namespace'    => 'App\Models\Ram',
+                'path'         => 'app/Models/Ram',
+                'className'    => [
+                    'pattern'     => '^ram_',
+                    'replacement' => '',
+                ],
+            ],
+            [
+                'tablePattern' => '^sta_',
+                'namespace'    => 'App\Models\Station',
+                'path'         => 'app/Models/Station',
+                'className'    => [
+                    'pattern'     => '^sta_',
+                    'replacement' => '',
+                ],
+            ],
+            [
+                'tablePattern' => '^trn_',
+                'namespace'    => 'App\Models\Translation',
+                'path'         => 'app/Models/Translation',
+                'className'    => [
+                    'pattern'     => '^trn_',
+                    'replacement' => '',
+                ],
+            ],
+            [
+                'tablePattern' => '^war_',
+                'namespace'    => 'App\Models\War',
+                'path'         => 'app/Models/War',
+                'className'    => [
+                    'pattern'     => '^war_',
+                    'replacement' => '',
+                ],
+            ],
+            [
+                'tablePattern' => '^planet_',
+                'namespace'    => 'App\Models\Planet',
+                'path'         => 'app/Models/Planet',
+                'className'    => [
+                    'pattern'     => '^planet_',
                     'replacement' => '',
                 ],
             ],
@@ -102,7 +201,7 @@ return [
     | Migration options
     | --------------------------------------------------------------------------
     */
-    'migration' => [
+    'migration'  => [
         /*
         | --------------------------------------------------------------------------
         | Default path

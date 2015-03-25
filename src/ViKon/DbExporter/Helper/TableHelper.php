@@ -1,0 +1,148 @@
+<?php
+
+namespace ViKon\DbExporter\Helper;
+
+use ViKon\DbExporter\DbExporterException;
+
+/**
+ * Class TableHelper
+ *
+ * @author  Kovács Vince <vincekovacs@hotmail.com>
+ *
+ * @package ViKon\DbExporter\Helper
+ */
+trait TableHelper {
+
+    /** @var string|null default table name */
+    protected $tableName = null;
+
+    /**
+     * Get index by columns name
+     *
+     * @param string|string[] $columnsName    columns name to match index columns
+     * @param string|null     $tableName      table name
+     * @param string|null     $connectionName database connection name (if null default connection is used)
+     *
+     * @return bool|\Doctrine\DBAL\Schema\Index FALSE if index not found, otherwise Index instance
+     */
+    public function getTableIndexByColumnsName($columnsName, $tableName = null, $connectionName = null) {
+        if (!is_array($columnsName)) {
+            $columnsName = [$columnsName];
+        }
+
+        $tableName = $this->validateTableName($tableName);
+
+        $indexes = $this->getTableIndexes($tableName, $connectionName);
+        foreach ($indexes as $index) {
+            // Check if columns are matched in index
+            if (count(array_intersect($index->getColumns(), $columnsName)) === count($columnsName)) {
+                return $index;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get table columns information
+     *
+     * @param string      $tableName      table name
+     * @param string|null $connectionName database connection name (if null default connection is used)
+     *
+     * @return \Doctrine\DBAL\Schema\Column[]
+     */
+    public function getTableColumns($tableName = null, $connectionName = null) {
+        $tableName = $this->validateTableName($tableName);
+
+        return $this->getSchema($connectionName)->listTableColumns($tableName);
+    }
+
+    /**
+     * Get table foreign key information
+     *
+     * @param string      $tableName      table name
+     * @param string|null $connectionName database connection name (if null default connection is used)
+     *
+     * @return \Doctrine\DBAL\Schema\ForeignKeyConstraint[]
+     */
+    public function getTableForeignKeys($tableName = null, $connectionName = null) {
+        $tableName = $this->validateTableName($tableName);
+
+        return $this->getSchema($connectionName)->listTableForeignKeys($tableName);
+    }
+
+    /**
+     * Get table name
+     *
+     * @return null|string
+     */
+    public function getTableName() {
+        return $this->tableName;
+    }
+
+    /**
+     * Set table name
+     *
+     * @param string $tableName table name
+     *
+     * @return $this
+     */
+    protected function setTableName($tableName) {
+        $this->tableName = $tableName;
+
+        return $this;
+    }
+
+    /**
+     * Get table indexes
+     *
+     * @param string|null $tableName      table name
+     * @param string|null $connectionName database connection name (if null default connection is used)
+     *
+     * @return \Doctrine\DBAL\Schema\Index[]
+     */
+    protected function getTableIndexes($tableName = null, $connectionName = null) {
+        $tableName = $this->validateTableName($tableName);
+
+        return $this->getSchema($connectionName)->listTableIndexes($tableName);
+    }
+
+    /**
+     * Validate table name in parameter and in class property
+     *
+     * @param string|null $tableName table name
+     *
+     * @return null|string
+     *
+     * @throws \ViKon\DbExporter\DbExporterException
+     */
+    protected function validateTableName($tableName = null) {
+        $tableName = $tableName === null ? $this->tableName : $tableName;
+
+        if ($tableName === null) {
+            throw new DbExporterException('Table name is null');
+        }
+
+        return $tableName;
+    }
+
+    /**
+     * If array contains only one element return exported array value otherwise return serialized array of elements
+     *
+     * All elements will snake cased
+     *
+     * @param array|string $attributes column name
+     * @param bool         $forceArray force array form even if array contains single value
+     *
+     * @return array|string
+     */
+    protected function serializeArrayColumnAttribute($attributes, $forceArray = false) {
+        foreach ($attributes as &$attribute) {
+            $attribute = str_replace(['ID'], ['Id'], $attribute);
+            $attribute = '\'' . snake_case($attribute) . '\'';
+        }
+
+        return $forceArray || count($attributes) > 1 ? '[' . implode(', ', $attributes) . ']' : reset($attributes);
+    }
+
+}

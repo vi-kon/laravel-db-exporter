@@ -4,12 +4,20 @@ namespace ViKon\DbExporter\Console\Commands;
 
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
-use ViKon\DbExporter\DatabaseHelper;
-use ViKon\DbExporter\ModelMetaData;
-use ViKon\DbExporter\TemplateHelper;
+use ViKon\DbExporter\Helper\DatabaseHelper;
+use ViKon\DbExporter\Helper\DatabaseSchemaHelper;
+use ViKon\DbExporter\Helper\TemplateHelper;
+use ViKon\DbExporter\Meta\Model;
 
+/**
+ * Class ModelsCommand
+ *
+ * @author  Kovács Vince <vincekovacs@hotmail.com>
+ *
+ * @package ViKon\DbExporter\Console\Commands
+ */
 class ModelsCommand extends Command {
-    use DatabaseHelper, TemplateHelper;
+    use DatabaseSchemaHelper, DatabaseHelper, TemplateHelper;
 
     /**
      * The console command name.
@@ -40,13 +48,12 @@ class ModelsCommand extends Command {
     public function fire() {
         $this->info('Creating models from database...');
 
-        $tables = $this->makeMetaData();
+        $models = $this->makeModels();
 
-        $this->makeRelations($tables);
+        $this->makeRelations($models);
 
-        foreach ($tables as $table) {
-            $foreignKeySource = $table->getRelationsSource();
-            $this->writeModelFile($table->getClass(false), snake_case($table->getName(true)), $foreignKeySource);
+        foreach ($models as $model) {
+            $model->writeOut($this->output, $this->option('overwrite'));
         }
 
         $this->info('Models successfully created');
@@ -55,70 +62,106 @@ class ModelsCommand extends Command {
     /**
      * Build up meta data
      *
-     * @return \ViKon\DbExporter\ModelMetaData[]
+     * @return \ViKon\DbExporter\Meta\Model[]
      */
-    protected function makeMetaData() {
-        $tableNames = $this->getTableNames($this->option('database'));
+    protected function makeModels() {
+        $path = $this->option('path');
+        $namespace = $this->option('namespace');
+        $connectionName = $this->option('connection');
 
-        $tables = [];
+        $tableNames = $this->getDatabaseTableNames($connectionName);
+
+        /** @var \ViKon\DbExporter\Meta\Model[] $models */
+        $models = [];
         foreach ($tableNames as $tableName) {
-            if (in_array($tableName, $this->option('ignore'))) {
+            if ($this->skipTable($tableName)) {
                 continue;
             }
 
-            $tables[$tableName] = new ModelMetaData($tableName, $this->option('database'), $this->option('namespace'), $this->option('prefix'));
+            $models[$tableName] = new Model($connectionName, $tableName);
+            $models[$tableName]->setPath($path);
+            $models[$tableName]->setNamespace($namespace);
+            $models[$tableName]->map();
         }
 
-        return $tables;
+        return $models;
     }
 
     /**
-     * @param \ViKon\DbExporter\ModelMetaData[] $tables
+     * Generate relation to each table
+     *
+     * @param \ViKon\DbExporter\Meta\Model[] $models
      */
-    protected function makeRelations(array $tables) {
-        foreach ($tables as $table) {
-            foreach ($table->getForeignKeys() as $foreignKey) {
-                if (!isset($tables[$foreignKey->getForeignTableName()])) {
+    protected function makeRelations(array $models) {
+        foreach ($models as $localModel) {
+            $localTable = $localModel->getTable();
+            $foreignKeys = $localTable->getTableForeignKeys();
+
+            foreach ($foreignKeys as $foreignKey) {
+                if (!isset($models[$foreignKey->getForeignTableName()])) {
                     continue;
                 }
 
-                $foreignTable = $tables[$foreignKey->getForeignTableName()];
+                $foreignModel = $models[$foreignKey->getForeignTableName()];
+                $foreignTable = $foreignModel->getTable();
 
-                $localIndex = $table->getIndexByColumn($foreignKey->getLocalColumns());
-                $foreignIndex = $foreignTable->getIndexByColumn($foreignKey->getForeignColumns());
+                $localColumns = $foreignKey->getLocalColumns();
+                $foreignColumns = $foreignKey->getForeignColumns();
 
-                $localTableClass = $table->getClass();
-                $foreignTableClass = $foreignTable->getClass();
+                $localIndex = $localTable->getTableIndexByColumnsName($localColumns);
+                $foreignIndex = $foreignTable->getTableIndexByColumnsName($foreignColumns);
 
-                $localColumn = $foreignKey->getLocalColumns();
-                $localColumn = reset($localColumn);
-                $foreignColumn = $foreignKey->getForeignColumns();
-                $foreignColumn = reset($foreignColumn);
+                $localTableClass = $localModel->getFullClass();
+                $foreignTableClass = $foreignModel->getFullClass();
+
+                $localColumn = reset($localColumns);
+                $foreignColumn = reset($foreignColumns);
 
                 // Guess foreign method name
                 $localMethodName = str_replace(['_id'], '', snake_case($localColumn));
-                $foreignMethodName = snake_case($table->getName());
+                $foreignMethodName = $localModel->getClass();
 
                 // Try to find out connection type
                 if ($localIndex !== false && $foreignIndex !== false && $localIndex->isUnique() && $foreignIndex->isUnique()) {
                     // One To One
-                    $table->addHasOneRelation($foreignTableClass, $localMethodName, $foreignColumn, $localColumn);
+                    $localTable->addHasOneRelation($foreignTableClass, $localMethodName, $foreignColumn, $localColumn);
                     $foreignTable->addBelongsToRelation($localTableClass, $foreignMethodName, $localColumn, $foreignColumn);
                 } elseif ($foreignIndex !== false && $foreignIndex->isUnique()) {
                     // Many To One
-                    $table->addBelongsToRelation($foreignTableClass, $localMethodName, $localColumn, $foreignColumn);
+                    $localTable->addBelongsToRelation($foreignTableClass, $localMethodName, $localColumn, $foreignColumn);
                     $foreignTable->addHasManyRelation($localTableClass, $foreignMethodName, $localColumn, $foreignColumn);
                 } elseif ($localIndex !== false && $localIndex->isUnique()) {
                     // One To Many
-                    $table->addHasManyRelation($foreignTableClass, $localMethodName, $foreignColumn, $localColumn);
+                    $localTable->addHasManyRelation($foreignTableClass, $localMethodName, $foreignColumn, $localColumn);
                     $foreignTable->addBelongsToRelation($localTableClass, $foreignMethodName, $localColumn, $foreignColumn);
                 } else {
                     // Many To Many without pivot table
-                    $table->addHasManyRelation($foreignTableClass, $localMethodName, $foreignColumn, $localColumn);
+                    $localTable->addHasManyRelation($foreignTableClass, $localMethodName, $foreignColumn, $localColumn);
                     $foreignTable->addHasManyRelation($localTableClass, $foreignMethodName, $localColumn, $foreignColumn);
                 }
             }
         }
+    }
+
+    /**
+     * Check if table is selected or not
+     *
+     * @param string $tableName table name
+     *
+     * @return bool
+     */
+    protected function skipTable($tableName) {
+        // Check if select options is set and table name is not selected
+        if (count($this->option('select')) > 0 && !in_array($tableName, $this->option('select'))) {
+            return true;
+        }
+
+        // Check if table name is ignored
+        if (in_array($tableName, $this->option('ignore'))) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -131,27 +174,10 @@ class ModelsCommand extends Command {
             ['prefix', null, InputOption::VALUE_OPTIONAL, 'Table prefix in models', config('db-exporter.prefix')],
             ['select', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Select specified database tables only', config('db-exporter.select')],
             ['ignore', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Ignore specified database tables', config('db-exporter.ignore')],
-            ['database', null, InputOption::VALUE_OPTIONAL, 'Specify database name', config('db-exporter.database')],
+            ['connection', null, InputOption::VALUE_OPTIONAL, 'Specify connection name', config('db-exporter.connection')],
             ['overwrite', null, InputOption::VALUE_NONE, 'Overwrite exists models'],
             ['namespace', null, InputOption::VALUE_OPTIONAL, 'Models base namespace', config('db-exporter.model.namespace')],
             ['path', null, InputOption::VALUE_OPTIONAL, 'Output destination path relative to project root', config('db-exporter.model.path')],
         ];
     }
-
-    /**
-     * Write model to file
-     *
-     * @param string $className   class name (and file names)
-     * @param string $tableName   model's table name
-     * @param string $foreignKeys rendered foreign keys
-     */
-    protected function writeModelFile($className, $tableName, $foreignKeys) {
-        $this->writeToFileFromTemplate('model', $className . '.php', [
-            '{{namespace}}'   => $this->option('namespace'),
-            '{{className}}'   => $className,
-            '{{tableName}}'   => $tableName,
-            '{{foreignKeys}}' => $foreignKeys,
-        ]);
-    }
-
 }
