@@ -136,13 +136,33 @@ trait TableHelper {
      *
      * @return array|string
      */
-    protected function serializeArrayColumnAttribute($attributes, $forceArray = false) {
+    protected function serializeArrayToAttributes($attributes, $forceArray = false) {
+        if (!is_array($attributes)) {
+            $attributes = [$attributes];
+        }
+
         foreach ($attributes as &$attribute) {
             $attribute = str_replace(['ID'], ['Id'], $attribute);
             $attribute = '\'' . snake_case($attribute) . '\'';
         }
 
         return $forceArray || count($attributes) > 1 ? '[' . implode(', ', $attributes) . ']' : reset($attributes);
+    }
+
+    /**
+     * Serialize index name to "pass" as attribute
+     *
+     * @param string $indexName
+     *
+     * @return string
+     */
+    protected function serializeIndexNameToAttribute($indexName) {
+        if (strtolower($indexName) === 'primary') {
+            $indexName = 'prim';
+        }
+        $indexName = str_replace(['ID'], ['Id'], $indexName);
+
+        return '\'' . snake_case($indexName) . '\'';
     }
 
 }

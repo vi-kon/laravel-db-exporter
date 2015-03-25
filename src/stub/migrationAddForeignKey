@@ -15,7 +15,9 @@ class {{className}} extends Migration {
      * @return void
      */
     public function up() {
-        {{up}}
+        Schema::table('{{tableName}}', function(Blueprint $table) {
+           {{createForeignKeys}}
+        });
     }
 
     /**
@@ -24,6 +26,8 @@ class {{className}} extends Migration {
      * @return void
      */
     public function down() {
-        {{down}}
+        Schema::table('{{tableName}}', function(Blueprint $table) {
+           {{dropForeignKeys}}
+        });
     }
 }

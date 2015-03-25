@@ -4,12 +4,20 @@ namespace ViKon\DbExporter\Console\Commands;
 
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
-use ViKon\DbExporter\DatabaseHelper;
-use ViKon\DbExporter\MigrationMetaData;
-use ViKon\DbExporter\TemplateHelper;
+use ViKon\DbExporter\Helper\DatabaseHelper;
+use ViKon\DbExporter\Helper\DatabaseSchemaHelper;
+use ViKon\DbExporter\Helper\TemplateHelper;
+use ViKon\DbExporter\Meta\Migration;
 
+/**
+ * Class MigrateCommand
+ *
+ * @author  Kovács Vince <vincekovacs@hotmail.com>
+ *
+ * @package ViKon\DbExporter\Console\Commands
+ */
 class MigrateCommand extends Command {
-    use DatabaseHelper, TemplateHelper;
+    use DatabaseSchemaHelper, DatabaseHelper, TemplateHelper;
 
     /**
      * The console command name.
@@ -40,34 +48,106 @@ class MigrateCommand extends Command {
     public function fire() {
         $this->info('Creating migration files from database...');
 
-        $tableOptions = [
-            'tablePrefix' => $this->option('prefix'),
-        ];
-
-        $tableNames = $this->getTableNames($this->option('database'));
-
-        /** @var \ViKon\DbExporter\MigrationMetaData[] $tables */
-        $tables = [];
-        foreach ($tableNames as $tableName) {
-            if (in_array($tableName, $this->option('ignore'))) {
-                continue;
-            }
-
-            $tables[$tableName] = new MigrationMetaData($tableName, $this->option('database'), $tableOptions);
-        }
+        $migrations = $this->createMigrations();
 
         $index = 0;
-        foreach ($tables as $table) {
-            $this->createMigrationForTable($index, $tables, $table);
+
+        // Write migration files
+        foreach ($migrations as $migration) {
+            $this->processMigration($index, $migrations, $migration);
         }
-        foreach ($tables as $table) {
-            if ($table->getStatus() === MigrationMetaData::STATUS_RECURSIVE_FOREIGN_KEY) {
-                $this->makeAddForeignKeysToTableMigrationFile($index, $table);
+
+        // Write separated foreign keys if migration has recursive foreign key
+        foreach ($migrations as $migration) {
+            if ($migration->getStatus() === Migration::STATUS_RECURSIVE_FOREIGN_KEY) {
+                $migration->writeForeignKeysOut($index, $this->output, $this->option('overwrite'));
                 $index++;
             }
         }
 
         $this->info('Migration files successfully created');
+
+        $this->call('clear-compiled');
+        $this->call('optimize');
+    }
+
+    public function createMigrations() {
+        $path = $this->option('path');
+        $connectionName = $this->option('connection');
+
+        $tableNames = $this->getDatabaseTableNames($connectionName);
+
+        /** @var \ViKon\DbExporter\Meta\Migration[] $migrations */
+        $migrations = [];
+        foreach ($tableNames as $tableName) {
+            if ($this->skipTable($tableName)) {
+                continue;
+            }
+
+            $migrations[$tableName] = new Migration($connectionName, $tableName);
+            $migrations[$tableName]->setPath($path);
+        }
+
+        return $migrations;
+    }
+
+    /**
+     * Check if table is selected or not
+     *
+     * @param string $tableName table name
+     *
+     * @return bool
+     */
+    protected function skipTable($tableName) {
+        // Check if select options is set and table name is not selected
+        if (count($this->option('select')) > 0 && !in_array($tableName, $this->option('select'))) {
+            return true;
+        }
+
+        // Check if table name is ignored
+        if (in_array($tableName, $this->option('ignore'))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Export table to file
+     *
+     * @param int                                $index      file index
+     * @param \ViKon\DbExporter\Meta\Migration[] $migrations available tables instances
+     * @param \ViKon\DbExporter\Meta\Migration   $migration  actual table instance files
+     */
+    protected function processMigration(&$index, array $migrations, Migration $migration) {
+        if (in_array($migration->getStatus(), [Migration::STATUS_MIGRATED, Migration::STATUS_RECURSIVE_FOREIGN_KEY])) {
+            return;
+        }
+
+        $migration->setStatus(Migration::STATUS_IN_PROGRESS);
+
+        // Check foreign keys
+        foreach ($migration->getTable()->getForeignTableNames() as $tableName) {
+            if ($migration->getTable()->getTableName() === $tableName) {
+                continue;
+            }
+
+            // Check recursive foreign key
+            if (isset($migrations[$tableName]) && $migrations[$tableName]->getStatus() === Migration::STATUS_IN_PROGRESS) {
+                $migration->setStatus(Migration::STATUS_RECURSIVE_FOREIGN_KEY);
+                continue;
+            }
+
+            $this->processMigration($index, $migrations, $migrations[$tableName]);
+        }
+
+        $migration->writeTableOut($index, $this->output, $this->option('overwrite'));
+
+        if ($migration->getStatus() !== Migration::STATUS_RECURSIVE_FOREIGN_KEY) {
+            $migration->setStatus(Migration::STATUS_MIGRATED);
+        }
+
+        $index++;
     }
 
     /**
@@ -80,110 +160,9 @@ class MigrateCommand extends Command {
             ['prefix', null, InputOption::VALUE_OPTIONAL, 'Table prefix in migration files', config('db-exporter.prefix')],
             ['select', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Select specified database tables only', config('db-exporter.select')],
             ['ignore', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Ignore specified database tables', config('db-exporter.ignore')],
-            ['database', null, InputOption::VALUE_OPTIONAL, 'Specify database name', config('db-exporter.database')],
+            ['connection', null, InputOption::VALUE_OPTIONAL, 'Specify database connection name', config('db-exporter.database')],
             ['overwrite', null, InputOption::VALUE_NONE, 'Overwrite exists migration files'],
             ['path', null, InputOption::VALUE_OPTIONAL, 'Output destination path relative to project root', config('db-exporter.migration.path')],
         ];
     }
-
-    /**
-     * Export table to file
-     *
-     * @param int                                   $index  file index
-     * @param \ViKon\DbExporter\Meta\MigrationMetaData[] $tables available tables instances
-     * @param \ViKon\DbExporter\Meta\MigrationMetaData   $table  actual table instance files
-     */
-    protected function createMigrationForTable(&$index, array $tables, MigrationMetaData $table) {
-        if (in_array($table->getStatus(), [MigrationMetaData::STATUS_MIGRATED, MigrationMetaData::STATUS_RECURSIVE_FOREIGN_KEY])) {
-            return;
-        }
-
-        $table->setStatus(MigrationMetaData::STATUS_IN_PROGRESS);
-
-        // Check foreign keys
-        foreach ($table->getForeignTableNames() as $tableName) {
-            if ($table->getName() === $tableName) {
-                continue;
-            }
-
-            // Check recursive foreign key
-            if (isset($tables[$tableName]) && $tables[$tableName]->getStatus() === MigrationMetaData::STATUS_IN_PROGRESS) {
-                $table->setStatus(MigrationMetaData::STATUS_RECURSIVE_FOREIGN_KEY);
-                continue;
-            }
-
-            $this->createMigrationForTable($index, $tables, $tables[$tableName]);
-        }
-
-        $this->makeCreateTableMigrationFile($index, $table);
-
-        if ($table->getStatus() !== MigrationMetaData::STATUS_RECURSIVE_FOREIGN_KEY) {
-            $table->setStatus(MigrationMetaData::STATUS_MIGRATED);
-        }
-
-        $index++;
-    }
-
-    /**
-     * Make Create{...}Table migration file
-     *
-     * @param int                              $index
-     * @param \ViKon\DbExporter\MigrationMetaData $table
-     *
-     * @throws \ViKon\DbExporter\DbExporterException
-     */
-    protected function makeCreateTableMigrationFile($index, MigrationMetaData $table) {
-        $up = 'Schema::create(\'' . snake_case($table->getName(true)) . '\', function(Blueprint $table) {' . "\n";
-        $up .= $table->getColumnsSource();
-        $up .= $table->getIndexesSource();
-        if ($table->getStatus() === MigrationMetaData::STATUS_IN_PROGRESS) {
-            $up .= $table->getForeignKeysSource();
-        }
-        $up .= '});';
-
-        $down = 'Schema::drop(\'' . snake_case($table->getName(true)) . '\');';
-
-        $prefix = date('Y_m_d') . '_' . str_pad($index, 6, '0', STR_PAD_LEFT);
-        $fileName = $prefix . '_create_' . snake_case($table->getName(true)) . '_table.php';
-
-        $this->writeMigrationFile($fileName, 'Create' . studly_case($table->getName(true)) . 'Table', $up, $down);
-    }
-
-    /**
-     * Make AddForeignKeysTo{...}Table migration file
-     *
-     * @param int                              $index
-     * @param \ViKon\DbExporter\MigrationMetaData $table
-     */
-    protected function makeAddForeignKeysToTableMigrationFile($index, MigrationMetaData $table) {
-        $up = 'Schema::table(\'' . snake_case($table->getName(true)) . '\', function(Blueprint $table) {' . "\n";
-        $up .= $table->getForeignKeysSource();
-        $up .= '});';
-
-        $down = 'Schema::table(\'' . snake_case($table->getName(true)) . '\', function(Blueprint $table) {' . "\n";
-        $down .= $table->getDropForeignKeysSource();
-        $down .= '});';
-
-        $prefix = date('Y_m_d') . '_' . str_pad($index, 6, '0', STR_PAD_LEFT);
-        $fileName = $prefix . '_add_foreign_keys_to_' . snake_case($table->getName(true)) . '_table.php';
-
-        $this->writeMigrationFile($fileName, 'AddForeignKeysTo' . studly_case($table->getName(true)) . 'Table', $up, $down);
-    }
-
-    /**
-     * Write migration to file
-     *
-     * @param string $fileName   migration file name
-     * @param string $className  migration class name
-     * @param string $upMethod   migration class up method content
-     * @param string $downMethod migration class down method content
-     */
-    protected function writeMigrationFile($fileName, $className, $upMethod, $downMethod) {
-        $this->writeToFileFromTemplate('migration', $fileName, [
-            '{{className}}' => $className,
-            '{{up}}'        => $upMethod,
-            '{{down}}'      => $downMethod,
-        ]);
-    }
-
 }
