@@ -60,7 +60,7 @@ class MigrateCommand extends Command {
         // Write separated foreign keys if migration has recursive foreign key
         foreach ($migrations as $migration) {
             if ($migration->getStatus() === Migration::STATUS_RECURSIVE_FOREIGN_KEY) {
-                $migration->writeForeignKeysOut($index, $this->output, $this->option('overwrite'));
+                $migration->writeForeignKeysOut($index, $this->output, $this->option('force'));
                 $index++;
             }
         }
@@ -141,7 +141,7 @@ class MigrateCommand extends Command {
             $this->processMigration($index, $migrations, $migrations[$tableName]);
         }
 
-        $migration->writeTableOut($index, $this->output, $this->option('overwrite'));
+        $migration->writeTableOut($index, $this->output, $this->option('force'));
 
         if ($migration->getStatus() !== Migration::STATUS_RECURSIVE_FOREIGN_KEY) {
             $migration->setStatus(Migration::STATUS_MIGRATED);
@@ -161,7 +161,7 @@ class MigrateCommand extends Command {
             ['select', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Select specified database tables only', config('db-exporter.select')],
             ['ignore', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Ignore specified database tables', config('db-exporter.ignore')],
             ['connection', null, InputOption::VALUE_OPTIONAL, 'Specify database connection name', config('db-exporter.database')],
-            ['overwrite', null, InputOption::VALUE_NONE, 'Overwrite exists migration files'],
+            ['force', null, InputOption::VALUE_NONE, 'Overwrite existing migration files'],
             ['path', null, InputOption::VALUE_OPTIONAL, 'Output destination path relative to project root', config('db-exporter.migration.path')],
         ];
     }

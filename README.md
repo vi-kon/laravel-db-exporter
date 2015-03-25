@@ -193,7 +193,7 @@ The `db-exporter:migrate` command is used for creating migration files from data
 * **select** - array of selected database table names (if set `ignore` option is ignored)
 * **ignore** - array of ignored database table names
 * **database** - specify database connection name (if option is not set the default connection is used)
-* **overwrite** - force overwriting existing migration files
+* **force** - force overwriting existing migration files
 * **path** - output destination path relative to project root (default is `database/migrations`)
 
 The example assumes following database tables:
@@ -229,7 +229,7 @@ The `db-exporter:models` command is used for creating models from database. It h
 * **select** - array of selected database table names (if set `ignore` option is ignored)
 * **ignore** - array of ignored database table names
 * **connection** - specify database connection name (if option is not set the default connection is used)
-* **overwrite** - force overwriting existing migration files
+* **force** - force overwriting existing migration files
 * **namespace** - models namespace (default is `App\Models`)
 * **path** - output destination path relative to project root (default is `database/migrations`)
 

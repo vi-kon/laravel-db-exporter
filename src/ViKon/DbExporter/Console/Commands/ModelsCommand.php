@@ -53,7 +53,7 @@ class ModelsCommand extends Command {
         $this->makeRelations($models);
 
         foreach ($models as $model) {
-            $model->writeOut($this->output, $this->option('overwrite'));
+            $model->writeOut($this->output, $this->option('force'));
         }
 
         $this->info('Models successfully created');
@@ -175,7 +175,7 @@ class ModelsCommand extends Command {
             ['select', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Select specified database tables only', config('db-exporter.select')],
             ['ignore', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Ignore specified database tables', config('db-exporter.ignore')],
             ['connection', null, InputOption::VALUE_OPTIONAL, 'Specify connection name', config('db-exporter.connection')],
-            ['overwrite', null, InputOption::VALUE_NONE, 'Overwrite exists models'],
+            ['force', null, InputOption::VALUE_NONE, 'Overwrite existing model files'],
             ['namespace', null, InputOption::VALUE_OPTIONAL, 'Models base namespace', config('db-exporter.model.namespace')],
             ['path', null, InputOption::VALUE_OPTIONAL, 'Output destination path relative to project root', config('db-exporter.model.path')],
         ];
