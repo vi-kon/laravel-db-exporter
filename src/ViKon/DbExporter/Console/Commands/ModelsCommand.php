@@ -48,7 +48,7 @@ class ModelsCommand extends Command {
     public function fire() {
         $this->info('Creating models from database...');
 
-        $models = $this->makeModels();
+        $models = $this->createModels();
 
         $this->makeRelations($models);
 
@@ -64,7 +64,7 @@ class ModelsCommand extends Command {
      *
      * @return \ViKon\DbExporter\Meta\Model[]
      */
-    protected function makeModels() {
+    protected function createModels() {
         $path = $this->option('path');
         $namespace = $this->option('namespace');
         $connectionName = $this->option('connection');

@@ -9,13 +9,13 @@ use ViKon\DbExporter\Meta\Relation\HasManyRelation;
 use ViKon\DbExporter\Meta\Relation\HasOneRelation;
 
 /**
- * Class Table
+ * Class ModelTable
  *
  * @author  Kovács Vince <vincekovacs@hotmail.com>
  *
  * @package ViKon\DbExporter\Meta
  */
-class Table {
+class ModelTable {
     use DatabaseSchemaHelper, TableHelper;
 
     /** @var \ViKon\DbExporter\Meta\Relation\AbstractRelation[] */

@@ -24,7 +24,7 @@ class Model {
     /** @var string */
     protected $class;
 
-    /** @var \ViKon\DbExporter\Meta\Table */
+    /** @var \ViKon\DbExporter\Meta\ModelTable */
     protected $table;
 
     /**
@@ -32,15 +32,8 @@ class Model {
      * @param string|null $tableName      table name
      */
     public function __construct($connectionName, $tableName) {
-        $this->table = new Table($connectionName, $tableName);
+        $this->table = new ModelTable($connectionName, $tableName);
         $this->class = snake_case($tableName);
-    }
-
-    /**
-     * @return string
-     */
-    public function getPath() {
-        return $this->path;
     }
 
     /**
@@ -83,25 +76,10 @@ class Model {
     }
 
     /**
-     * @return \ViKon\DbExporter\Meta\Table
+     * @return \ViKon\DbExporter\Meta\ModelTable
      */
     public function getTable() {
         return $this->table;
-    }
-
-    /**
-     * Render model class and write out to file
-     *
-     * @param \Symfony\Component\Console\Output\OutputInterface|null $output    command line output
-     * @param bool                                                   $overwrite overwrite existing models or not
-     */
-    public function writeOut(OutputInterface $output = null, $overwrite = false) {
-        $this->writeToFileFromTemplate($this->path . '/' . $this->getClass() . '.php', 'model', $output, [
-            'namespace'       => $this->namespace,
-            'className'       => $this->getClass(),
-            'tableName'       => $this->table->getTableName(),
-            'relationMethods' => $this->table->renderRelationMethods(),
-        ], $overwrite);
     }
 
     /**
@@ -127,5 +105,20 @@ class Model {
                 break;
             }
         }
+    }
+
+    /**
+     * Render model class and write out to file
+     *
+     * @param \Symfony\Component\Console\Output\OutputInterface|null $output    command line output
+     * @param bool                                                   $overwrite overwrite existing models or not
+     */
+    public function writeOut(OutputInterface $output = null, $overwrite = false) {
+        $this->writeToFileFromTemplate($this->path . '/' . $this->getClass() . '.php', 'model', $output, [
+            'namespace'       => $this->namespace,
+            'className'       => $this->getClass(),
+            'tableName'       => $this->table->getTableName(),
+            'relationMethods' => $this->table->renderRelationMethods(),
+        ], $overwrite);
     }
 }
