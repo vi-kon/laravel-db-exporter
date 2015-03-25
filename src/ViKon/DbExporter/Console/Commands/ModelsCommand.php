@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use ViKon\DbExporter\Helper\DatabaseHelper;
 use ViKon\DbExporter\Helper\DatabaseSchemaHelper;
-use ViKon\DbExporter\Helper\TemplateHelper;
+use ViKon\DbExporter\Helper\TableHelper;
 use ViKon\DbExporter\Meta\Model;
 
 /**
@@ -17,7 +17,7 @@ use ViKon\DbExporter\Meta\Model;
  * @package ViKon\DbExporter\Console\Commands
  */
 class ModelsCommand extends Command {
-    use DatabaseSchemaHelper, DatabaseHelper, TemplateHelper;
+    use DatabaseSchemaHelper, DatabaseHelper, TableHelper;
 
     /**
      * The console command name.
@@ -141,27 +141,6 @@ class ModelsCommand extends Command {
                 }
             }
         }
-    }
-
-    /**
-     * Check if table is selected or not
-     *
-     * @param string $tableName table name
-     *
-     * @return bool
-     */
-    protected function skipTable($tableName) {
-        // Check if select options is set and table name is not selected
-        if (count($this->option('select')) > 0 && !in_array($tableName, $this->option('select'))) {
-            return true;
-        }
-
-        // Check if table name is ignored
-        if (in_array($tableName, $this->option('ignore'))) {
-            return true;
-        }
-
-        return false;
     }
 
     /**

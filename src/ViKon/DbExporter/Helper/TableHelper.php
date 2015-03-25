@@ -165,4 +165,26 @@ trait TableHelper {
         return '\'' . snake_case($indexName) . '\'';
     }
 
+    /**
+     * Check if table is selected or not
+     *
+     * @param string $tableName table name
+     *
+     * @return bool
+     */
+    protected function skipTable($tableName) {
+        // Check if select options is set and table name is not selected
+        if (count($this->option('select')) > 0 && !in_array($tableName, $this->option('select'))) {
+            return true;
+        }
+
+        // Check if table name is ignored
+        if (in_array($tableName, $this->option('ignore'))) {
+            return true;
+        }
+
+        return false;
+    }
+
+
 }
