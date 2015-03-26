@@ -73,7 +73,7 @@ class Migration {
      * @param bool                                                   $overwrite overwrite existing models or not
      */
     public function writeTableOut($index, OutputInterface $output = null, $overwrite = false) {
-        if ($this->status !== self::STATUS_IN_PROGRESS) {
+        if ($this->status !== self::STATUS_IN_PROGRESS && $this->status !== self::STATUS_RECURSIVE_FOREIGN_KEY) {
             return;
         }
 
