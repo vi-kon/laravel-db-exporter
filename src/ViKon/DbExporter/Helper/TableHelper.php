@@ -72,6 +72,25 @@ trait TableHelper {
     }
 
     /**
+     * Get tables foreign table names from foreign keys
+     *
+     * @param string      $tableName      table name
+     * @param string|null $connectionName database connection name (if null default connection is used)
+     *
+     * @return string[]
+     */
+    public function getForeignTableNames($tableName = null, $connectionName = null) {
+        $foreignKeys = $this->getTableForeignKeys($tableName, $connectionName);
+        $tableNames = [];
+
+        foreach ($foreignKeys as $foreignKey) {
+            $tableNames[] = $foreignKey->getForeignTableName();
+        }
+
+        return array_unique($tableNames);
+    }
+
+    /**
      * Get table name
      *
      * @return null|string

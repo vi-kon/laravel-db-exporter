@@ -68,11 +68,11 @@ class Migration {
     /**
      * Render migration create table class and write out to file
      *
-     * @param int                                                    $index     migration file index
-     * @param \Symfony\Component\Console\Output\OutputInterface|null $output    command line output
-     * @param bool                                                   $overwrite overwrite existing models or not
+     * @param int                                                    $index  migration file index
+     * @param \Symfony\Component\Console\Output\OutputInterface|null $output command line output
+     * @param bool                                                   $force  force overwrite existing models or not
      */
-    public function writeTableOut($index, OutputInterface $output = null, $overwrite = false) {
+    public function writeTableOut($index, OutputInterface $output = null, $force = false) {
         if ($this->status !== self::STATUS_IN_PROGRESS && $this->status !== self::STATUS_RECURSIVE_FOREIGN_KEY) {
             return;
         }
@@ -87,17 +87,17 @@ class Migration {
             'columns'     => $this->table->renderCreateColumns(),
             'indexes'     => $this->table->renderCreateIndexes(),
             'foreignKeys' => $this->status === self::STATUS_IN_PROGRESS ? $this->table->renderCreateForeignKeys() : '',
-        ], $overwrite);
+        ], $force);
     }
 
     /**
      * Render migration add foreign keys to table class and write out to file
      *
-     * @param int                                                    $index     migration file index
-     * @param \Symfony\Component\Console\Output\OutputInterface|null $output    command line output
-     * @param bool                                                   $overwrite overwrite existing models or not
+     * @param int                                                    $index  migration file index
+     * @param \Symfony\Component\Console\Output\OutputInterface|null $output command line output
+     * @param bool                                                   $force  force overwrite existing models or not
      */
-    public function writeForeignKeysOut($index, OutputInterface $output = null, $overwrite = false) {
+    public function writeForeignKeysOut($index, OutputInterface $output = null, $force = false) {
         if ($this->status !== self::STATUS_RECURSIVE_FOREIGN_KEY) {
             return;
         }
@@ -111,7 +111,7 @@ class Migration {
             'tableName'         => snake_case($this->table->getTableName()),
             'createForeignKeys' => $this->table->renderCreateForeignKeys(),
             'dropForeignKeys'   => $this->table->renderDropForeignKeys(),
-        ], $overwrite);
+        ], $force);
     }
 
 }

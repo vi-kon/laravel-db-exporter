@@ -27,22 +27,6 @@ class MigrationTable {
     }
 
     /**
-     * Get tables foreign table names from foreign keys
-     *
-     * @return string[]
-     */
-    public function getForeignTableNames() {
-        $foreignKeys = $this->getTableForeignKeys();
-        $tableNames = [];
-
-        foreach ($foreignKeys as $foreignKey) {
-            $tableNames[] = $foreignKey->getForeignTableName();
-        }
-
-        return array_unique($tableNames);
-    }
-
-    /**
      * Render table columns create schema builder methods
      *
      * @return string

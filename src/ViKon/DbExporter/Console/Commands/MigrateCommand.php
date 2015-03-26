@@ -102,11 +102,11 @@ class MigrateCommand extends Command {
         if (in_array($migration->getStatus(), [Migration::STATUS_MIGRATED, Migration::STATUS_RECURSIVE_FOREIGN_KEY])) {
             return;
         }
-
         $migration->setStatus(Migration::STATUS_IN_PROGRESS);
 
         // Check foreign keys
-        foreach ($migration->getTable()->getForeignTableNames() as $tableName) {
+        $tableNames = $migration->getTable()->getForeignTableNames();
+        foreach ($tableNames as $tableName) {
             if ($migration->getTable()->getTableName() === $tableName) {
                 continue;
             }
