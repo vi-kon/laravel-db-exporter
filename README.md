@@ -175,6 +175,22 @@ return [
         */
         'path' => 'database/migrations',
     ],
+    /*
+    | --------------------------------------------------------------------------
+    | Seed options
+    | --------------------------------------------------------------------------
+    */
+    'seed'       => [
+        /*
+        | --------------------------------------------------------------------------
+        | Default path
+        | --------------------------------------------------------------------------
+        | Generated seed destination path. Is relative to projects base path.
+        | In command with --path option can overwrite.
+        |
+        */
+        'path' => 'database/seeds',
+    ],
 ];
 ```
 
@@ -183,7 +199,7 @@ return [
 
 ## Usages
 
-**Note**: Generated files may need some autoformatting.
+**Note**: Generated files may need some auto-formatting.
 
 ### Creating migration files
 
@@ -241,6 +257,23 @@ Creating models from default database:
 
 ```bash
 php artisan db-exporter:models
+```
+
+### Creating seed files
+
+The `db-exporter:seed` command is used for creating seeds from database data. It has several options:
+
+* **prefix** - database name prefix in migration files
+* **select** - array of selected database table names (if set `ignore` option is ignored)
+* **ignore** - array of ignored database table names
+* **connection** - specify database connection name (if option is not set the default connection is used)
+* **force** - force overwriting existing migration files
+* **path** - output destination path relative to project root (default is `database/seeds`)
+
+Creating seed files from default database:
+
+```bash
+php artisan db-exporter:seed
 ```
 
 ---

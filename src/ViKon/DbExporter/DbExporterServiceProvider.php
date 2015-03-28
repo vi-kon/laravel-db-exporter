@@ -13,7 +13,6 @@ use Illuminate\Support\ServiceProvider;
  */
 class DbExporterServiceProvider extends ServiceProvider {
 
-
     /**
      * Bootstrap the application events.
      *
@@ -33,6 +32,7 @@ class DbExporterServiceProvider extends ServiceProvider {
     public function register() {
         $this->commands('ViKon\DbExporter\Console\Commands\MigrateCommand');
         $this->commands('ViKon\DbExporter\Console\Commands\ModelsCommand');
+        $this->commands('ViKon\DbExporter\Console\Commands\SeedCommand');
 
         $this->mergeConfigFrom(__DIR__ . '/../../config/config.php', 'db-exporter');
     }
