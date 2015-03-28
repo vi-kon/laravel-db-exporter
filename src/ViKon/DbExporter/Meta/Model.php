@@ -3,6 +3,7 @@
 namespace ViKon\DbExporter\Meta;
 
 use Symfony\Component\Console\Output\OutputInterface;
+use ViKon\DbExporter\Helper\ClassHelper;
 use ViKon\DbExporter\Helper\TemplateHelper;
 
 /**
@@ -13,16 +14,7 @@ use ViKon\DbExporter\Helper\TemplateHelper;
  * @package ViKon\DbExporter\Meta
  */
 class Model {
-    use TemplateHelper;
-
-    /** @var string */
-    protected $path;
-
-    /** @var string */
-    protected $namespace;
-
-    /** @var string */
-    protected $class;
+    use TemplateHelper, ClassHelper;
 
     /** @var \ViKon\DbExporter\Meta\ModelTable */
     protected $table;
@@ -33,46 +25,7 @@ class Model {
      */
     public function __construct($connectionName, $tableName) {
         $this->table = new ModelTable($connectionName, $tableName);
-        $this->class = snake_case($tableName);
-    }
-
-    /**
-     * @param string $path
-     */
-    public function setPath($path) {
-        $this->path = $path;
-    }
-
-    /**
-     * @return string
-     */
-    public function getNamespace() {
-        return $this->namespace;
-    }
-
-    /**
-     * @param string $namespace
-     */
-    public function setNamespace($namespace) {
-        $this->namespace = $namespace;
-    }
-
-    /**
-     * Get class name without namespace
-     *
-     * @return string
-     */
-    public function getClass() {
-        return studly_case($this->class);
-    }
-
-    /**
-     * Get class name with namespace
-     *
-     * @return string
-     */
-    public function getFullClass() {
-        return trim($this->namespace, '/') . '\\' . $this->getClass();
+        $this->setClass($tableName);
     }
 
     /**
@@ -95,7 +48,6 @@ class Model {
                 $this->path = $item['path'];
                 $this->namespace = $item['namespace'];
 
-
                 if ($item['className'] !== null) {
                     $pattern = '/' . str_replace('/', '\/', $item['className']['pattern']) . '/';
                     $replacement = $item['className']['replacement'];
@@ -110,15 +62,17 @@ class Model {
     /**
      * Render model class and write out to file
      *
-     * @param \Symfony\Component\Console\Output\OutputInterface|null $output    command line output
-     * @param bool                                                   $overwrite overwrite existing models or not
+     * @param \Symfony\Component\Console\Output\OutputInterface|null $output command line output
+     * @param bool                                                   $force  force overwrite existing models or not
      */
-    public function writeOut(OutputInterface $output = null, $overwrite = false) {
-        $this->writeToFileFromTemplate($this->path . '/' . $this->getClass() . '.php', 'model', $output, [
+    public function writeOut(OutputInterface $output = null, $force = false) {
+        $class = str_singular($this->getClass());
+
+        $this->writeToFileFromTemplate($this->path . '/' . $class . '.php', 'model', $output, [
             'namespace'       => $this->namespace,
-            'className'       => $this->getClass(),
-            'tableName'       => $this->table->getTableName(),
+            'className'       => $class,
+            'tableName'       => snake_case($this->table->getTableName()),
             'relationMethods' => $this->table->renderRelationMethods(),
-        ], $overwrite);
+        ], $force);
     }
 }

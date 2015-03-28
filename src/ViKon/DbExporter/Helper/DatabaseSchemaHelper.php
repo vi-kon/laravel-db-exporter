@@ -38,7 +38,11 @@ trait DatabaseSchemaHelper {
 
         /** @var \Doctrine\DBAL\Schema\AbstractSchemaManager $schema */
         $schema = app('db')->connection($connectionName)->getDoctrineSchemaManager();
+        // For MySQL
         $schema->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
+        // For Sqlite
+        $schema->getDatabasePlatform()->registerDoctrineTypeMapping('long', 'integer');
+        $schema->getDatabasePlatform()->registerDoctrineTypeMapping('bit', 'boolean');
 
         return $schema;
     }
