@@ -110,7 +110,7 @@ class MigrationTable {
             $source .= ';' . "\n";
         }
 
-        return $source;
+        return trim($source);
     }
 
     /**
@@ -136,7 +136,7 @@ class MigrationTable {
             }
         }
 
-        return $source . "\n";
+        return trim($source);
     }
 
     /**
@@ -171,7 +171,7 @@ class MigrationTable {
             $source .= ';' . "\n";
         }
 
-        return $source;
+        return trim($source);
     }
 
     /**
@@ -192,6 +192,6 @@ class MigrationTable {
             $source .= "\n" . '$table->dropForeign(' . $name . ');';
         }
 
-        return $source;
+        return trim($source);
     }
 }
