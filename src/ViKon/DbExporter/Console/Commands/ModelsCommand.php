@@ -111,8 +111,8 @@ class ModelsCommand extends Command {
                 $localIndex = $localTable->getTableIndexByColumnsName($localColumns);
                 $foreignIndex = $foreignTable->getTableIndexByColumnsName($foreignColumns);
 
-                $localTableClass = $localModel->getFullClass();
-                $foreignTableClass = $foreignModel->getFullClass();
+                $localTableClass = str_singular($localModel->getFullClass());
+                $foreignTableClass = str_singular($foreignModel->getFullClass());
 
                 $localColumn = reset($localColumns);
                 $foreignColumn = reset($foreignColumns);
