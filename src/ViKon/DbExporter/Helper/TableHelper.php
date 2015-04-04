@@ -19,23 +19,25 @@ trait TableHelper {
     /**
      * Get index by columns name
      *
-     * @param string|string[] $columnsName    columns name to match index columns
+     * @param string|string[] $columnNames    columns name to match index columns
      * @param string|null     $tableName      table name
      * @param string|null     $connectionName database connection name (if null default connection is used)
      *
      * @return bool|\Doctrine\DBAL\Schema\Index FALSE if index not found, otherwise Index instance
      */
-    public function getTableIndexByColumnsName($columnsName, $tableName = null, $connectionName = null) {
-        if (!is_array($columnsName)) {
-            $columnsName = [$columnsName];
+    public function getTableIndexByColumnsName($columnNames, $tableName = null, $connectionName = null) {
+        if (!is_array($columnNames)) {
+            $columnNames = [$columnNames];
         }
 
         $tableName = $this->validateTableName($tableName);
 
+
         $indexes = $this->getTableIndexes($tableName, $connectionName);
         foreach ($indexes as $index) {
+            $indexColumns = $index->getColumns();
             // Check if columns are matched in index
-            if (count(array_intersect($index->getColumns(), $columnsName)) === count($columnsName)) {
+            if (count($indexColumns) === count($columnNames) && count($indexColumns) === count(array_intersect($indexColumns, $columnNames))) {
                 return $index;
             }
         }
