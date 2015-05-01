@@ -93,8 +93,8 @@ class ModelsCommand extends Command {
      * @param \ViKon\DbExporter\Meta\Model[] $models
      */
     protected function makeRelations(array $models) {
-        foreach ($models as $localModel) {
-            $localTable = $localModel->getTable();
+        foreach ($models as $model) {
+            $localTable = $model->getTable();
             $foreignKeys = $localTable->getTableForeignKeys();
 
             foreach ($foreignKeys as $foreignKey) {
@@ -111,7 +111,7 @@ class ModelsCommand extends Command {
                 $localIndex = $localTable->getTableIndexByColumnsName($localColumns);
                 $foreignIndex = $foreignTable->getTableIndexByColumnsName($foreignColumns);
 
-                $localTableClass = str_singular($localModel->getFullClass());
+                $localTableClass = str_singular($model->getFullClass());
                 $foreignTableClass = str_singular($foreignModel->getFullClass());
 
                 $localColumn = reset($localColumns);
@@ -119,7 +119,7 @@ class ModelsCommand extends Command {
 
                 // Guess foreign method name
                 $localMethodName = str_replace(['_id'], '', snake_case($localColumn));
-                $foreignMethodName = $localModel->getClass();
+                $foreignMethodName = $model->getClass();
 
                 // Try to find out connection type
                 if ($localIndex !== false && $foreignIndex !== false && $localIndex->isUnique() && $foreignIndex->isUnique()) {
