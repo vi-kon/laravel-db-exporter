@@ -29,7 +29,7 @@ To `composer.json` file add following lines:
 
 ```json
 // to "require" object
-"vi-kon/db-exporter": "~1.*"
+"vi-kon/laravel-db-exporter": "~1.*"
 ```
 
 Or run following command in project root:
