@@ -35,7 +35,7 @@ To `composer.json` file add following lines:
 Or run following command in project root:
 
 ```bash
-composer require vi-kon/db-exporter
+composer require vi-kon/laravel-db-exporter
 ```
 
 In Laravel 5 project add following lines to `app.php`:
