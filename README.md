@@ -15,7 +15,7 @@ This is database table structure and data exporter to migration and seed files f
 * create **migration** files from database table structure 
 * handle foreign keys (watch for recursive foreign keys)
 * create **model** files from database table structure (even foreign keys)
-* **organize** generated models depending on database tabla name to **individual namespace** and **directory** structure via regullar expressions
+* **organize** generated models depending on database tabla name to **individual namespace** and **directory** structure via regular expressions
 * create **seed** files from database table content
 
 ---
@@ -60,8 +60,6 @@ php artisan vendor:publish --provider="ViKon\DbExporter\DbExporterServiceProvide
 Configuration files help set up default values for commands.
 
 ```php
-<?php
-
 return [
     /*
     | --------------------------------------------------------------------------
@@ -72,7 +70,6 @@ return [
     |
     */
     'connection' => null,
-
     /*
     | --------------------------------------------------------------------------
     | Default table prefix
@@ -82,7 +79,6 @@ return [
     |
     */
     'prefix'     => '',
-
     /*
     | --------------------------------------------------------------------------
     | Default selected tables
@@ -92,7 +88,6 @@ return [
     |
     */
     'select'     => [],
-
     /*
     | --------------------------------------------------------------------------
     | Default ignored tables
@@ -104,7 +99,6 @@ return [
     'ignore'     => [
         'migrations',
     ],
-
     /*
     | --------------------------------------------------------------------------
     | Model options
@@ -120,7 +114,6 @@ return [
         |
         */
         'namespace' => 'App\Models',
-
         /*
         | --------------------------------------------------------------------------
         | Default path
@@ -129,8 +122,7 @@ return [
         | command with --path option can overwrite.
         |
         */
-        'path'      => 'app/Models',
-
+        'path'      => app_path('Models'),
         /*
         | --------------------------------------------------------------------------
         | Custom map
@@ -173,7 +165,7 @@ return [
         | In command with --path option can overwrite.
         |
         */
-        'path' => 'database/migrations',
+        'path' => base_path('database/migrations'),
     ],
     /*
     | --------------------------------------------------------------------------
@@ -189,7 +181,7 @@ return [
         | In command with --path option can overwrite.
         |
         */
-        'path' => 'database/seeds',
+        'path' => base_path('database/seeds'),
     ],
 ];
 ```
@@ -210,7 +202,9 @@ The `db-exporter:migrate` command is used for creating migration files from data
 * **ignore** - array of ignored database table names
 * **database** - specify database connection name (if option is not set the default connection is used)
 * **force** - force overwriting existing migration files
-* **path** - output destination path relative to project root (default is `database/migrations`)
+* **path** - output destination path relative to project root (default is `{PROJECT ROOT}/database/migrations`)
+
+**Note**: Model path given by `migration.path` config key have to be writable by PHP to generate models.
 
 The example assumes following database tables:
 
@@ -224,7 +218,7 @@ Exports all tables from default database:
 php artisan db-exporter:migrate
 ```
 
-The above command will generate following files into `database/migrations` directory:
+The above command will generate following files into `{PROJECT ROOT}/database/migrations` directory:
 
 ```bash
 YYYY-MM-DD_000000_create_users_table.php
@@ -232,7 +226,7 @@ YYYY-MM-DD_000001_create_groups_table.php
 YYYY-MM-DD_000002_create_pages_table.php
 ```
 
-**Note**: Table names and column names are converted to snake cased
+**Note**: Table names and column names are converted to snake cased.
 
 ---
 [Back to top][top]
@@ -247,11 +241,13 @@ The `db-exporter:models` command is used for creating models from database. It h
 * **connection** - specify database connection name (if option is not set the default connection is used)
 * **force** - force overwriting existing migration files
 * **namespace** - models namespace (default is `App\Models`)
-* **path** - output destination path relative to project root (default is `database/migrations`)
+* **path** - output destination path relative to project root (default is `{PROJECT ROOT}/database/migrations`)
 
 **Note**: Some situation foreign methods name can match in models, so manual renaming is needed.
 
-**Note**: In some cases relation guess (One to One, Many to One, One to Many) can generate same method name in single class.
+**Note**: In some cases relation guess (`One to One`, `Many to One`, `One to Many`) can generate same method names in single class.
+
+**Note**: Model path given by `model.path` config key have to be writable by PHP to generate models.
 
 Creating models from default database:
 
@@ -269,6 +265,8 @@ The `db-exporter:seed` command is used for creating seeds from database data. It
 * **connection** - specify database connection name (if option is not set the default connection is used)
 * **force** - force overwriting existing migration files
 * **path** - output destination path relative to project root (default is `database/seeds`)
+
+**Note**: Seed path given by `seed.path` config key have to be writable by PHP to generate seed classes.
 
 Creating seed files from default database:
 

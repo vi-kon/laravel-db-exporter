@@ -10,7 +10,6 @@ return [
     |
     */
     'connection' => null,
-
     /*
     | --------------------------------------------------------------------------
     | Default table prefix
@@ -20,7 +19,6 @@ return [
     |
     */
     'prefix'     => '',
-
     /*
     | --------------------------------------------------------------------------
     | Default selected tables
@@ -30,7 +28,6 @@ return [
     |
     */
     'select'     => [],
-
     /*
     | --------------------------------------------------------------------------
     | Default ignored tables
@@ -42,7 +39,6 @@ return [
     'ignore'     => [
         'migrations',
     ],
-
     /*
     | --------------------------------------------------------------------------
     | Model options
@@ -58,7 +54,6 @@ return [
         |
         */
         'namespace' => 'App\Models',
-
         /*
         | --------------------------------------------------------------------------
         | Default path
@@ -67,8 +62,7 @@ return [
         | command with --path option can overwrite.
         |
         */
-        'path'      => 'app/Models',
-
+        'path'      => app_path('Models'),
         /*
         | --------------------------------------------------------------------------
         | Custom map
@@ -111,7 +105,7 @@ return [
         | In command with --path option can overwrite.
         |
         */
-        'path' => 'database/migrations',
+        'path' => base_path('database/migrations'),
     ],
     /*
     | --------------------------------------------------------------------------
@@ -127,6 +121,6 @@ return [
         | In command with --path option can overwrite.
         |
         */
-        'path' => 'database/seeds',
+        'path' => base_path('database/seeds'),
     ],
 ];
