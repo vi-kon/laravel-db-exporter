@@ -13,7 +13,8 @@ use ViKon\DbExporter\Helper\TemplateHelper;
  *
  * @package ViKon\DbExporter\Meta
  */
-class Seed {
+class Seed
+{
     /** @var string */
     protected $path;
 
@@ -26,28 +27,32 @@ class Seed {
      * @param string|null $connectionName connection name
      * @param string|null $tableName      table name
      */
-    public function __construct($connectionName, $tableName) {
+    public function __construct($connectionName, $tableName)
+    {
         $this->table = new SeedTable($connectionName, $tableName);
     }
 
     /**
      * @return string
      */
-    public function getPath() {
+    public function getPath()
+    {
         return $this->path;
     }
 
     /**
      * @param string $path
      */
-    public function setPath($path) {
+    public function setPath($path)
+    {
         $this->path = $path;
     }
 
     /**
      * @return \ViKon\DbExporter\Meta\SeedTable
      */
-    public function getTable() {
+    public function getTable()
+    {
         return $this->table;
     }
 
@@ -56,9 +61,10 @@ class Seed {
      *
      * @return array[]
      */
-    public function renderData() {
-        $columns = $this->table->getTableColumns();
-        $types = [];
+    public function renderData()
+    {
+        $columns   = $this->table->getTableColumns();
+        $types     = [];
         $structure = [];
         foreach ($columns as $column) {
             $structure[] = snake_case(str_replace('ID', 'Id', $column->getName()));
@@ -122,7 +128,8 @@ class Seed {
      *
      * @return string
      */
-    public function getClass() {
+    public function getClass()
+    {
         return studly_case(snake_case($this->table->getTableName()) . '_seeder');
     }
 
@@ -131,11 +138,12 @@ class Seed {
      *
      * @return string
      */
-    public function getModelClass() {
+    public function getModelClass()
+    {
         $map = config('db-exporter.model.map');
 
         $namespace = config('db-exporter.model.namespace');
-        $class = snake_case($this->getTable()->getTableName());
+        $class     = snake_case($this->getTable()->getTableName());
 
         foreach ($map as $item) {
             // Find matching table name
@@ -145,7 +153,7 @@ class Seed {
                 $namespace = $item['namespace'];
 
                 if ($item['className'] !== null) {
-                    $pattern = '/' . str_replace('/', '\/', $item['className']['pattern']) . '/';
+                    $pattern     = '/' . str_replace('/', '\/', $item['className']['pattern']) . '/';
                     $replacement = $item['className']['replacement'];
                     echo $replacement;
                     $class = preg_replace($pattern, $replacement, $class);
@@ -163,26 +171,29 @@ class Seed {
      * @param \Symfony\Component\Console\Output\OutputInterface|null $output command line output
      * @param bool                                                   $force  force overwrite existing models or not
      */
-    public function writeSeedOut(OutputInterface $output, $force) {
-        $class = $this->getClass();
+    public function writeSeedOut(OutputInterface $output, $force)
+    {
+        $class      = $this->getClass();
         $modelClass = $this->getModelClass();
 
         $fileName = $class . '.php';
 
         list($structure, $data, $count) = $this->renderData();
 
-        $this->writeToFileFromTemplate($this->path . '/' . $fileName, 'seeder', $output, [
-            'use'       => $modelClass,
-            'className' => $this->getClass(),
-            'tableName' => snake_case($this->table->getTableName()),
-            'model'     => class_basename($modelClass),
-            'structure' => var_export($structure, true),
-            'count'     => $count,
-        ], $force);
+        if ($count > 0) {
+            $this->writeToFileFromTemplate($this->path . '/' . $fileName, 'seeder', $output, [
+                'use'       => $modelClass,
+                'className' => $this->getClass(),
+                'tableName' => snake_case($this->table->getTableName()),
+                'model'     => class_basename($modelClass),
+                'structure' => var_export($structure, true),
+                'count'     => $count,
+            ], $force);
 
-        $this->writeToFileFromTemplate($this->path . '/data/' . snake_case($this->table->getTableName()) . '_table_data.php', 'seederData', $output, [
-            'data' => $data,
-        ], $force);
+            $this->writeToFileFromTemplate($this->path . '/data/' . snake_case($this->table->getTableName()) . '_table_data.php', 'seederData', $output, [
+                'data' => $data,
+            ], $force);
+        }
     }
 
 }
