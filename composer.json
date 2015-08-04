@@ -16,9 +16,10 @@
     }
   ],
   "require"          : {
-    "php"               : ">=5.4.0",
-    "illuminate/support": "~5.0",
-    "doctrine/dbal"     : "~2.3"
+    "php"                     : ">=5.4.0",
+    "illuminate/support"      : "~5.0",
+    "doctrine/dbal"           : "~2.3",
+    "vi-kon/laravel-utilities": "~2.2"
   },
   "autoload"         : {
     "psr-0": {

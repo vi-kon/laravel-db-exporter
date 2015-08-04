@@ -1,11 +1,11 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use ViKon\Utilities\ConsoleProgressbar;
+use ViKon\Utilities\SeederProgressBarTrait;
 use {{use}};
 
 class {{className}} extends Seeder {
-    use ConsoleProgressbar;
+    use SeederProgressBarTrait;
 
     protected $output;
 
@@ -22,14 +22,18 @@ class {{className}} extends Seeder {
 
         $this->output = $this->command->getOutput();
 
-        $this->initProgressbar();
-        $this->startProgress('<info>Inserting data:</info> {{tableName}}');
-        $this->setProgressMax({{count}});
+        $progress = $this->createProgressBar();
+        $this->command->line('<info>Inserting data:</info> {{tableName}}');
+        $progress->start({{count}});
 
         $data = include(__DIR__ . '/data/{{tableName}}_table_data.php');
 	    foreach($data as $row) {
 	        $this->create($row);
+	        $progress->advance();
 	    }
+
+        $progress->finish();
+        $this->command->getOutput()->writeln('');
 	}
 
 	protected function create($values) {
@@ -38,7 +42,6 @@ class {{className}} extends Seeder {
             $data[$key] = $values[$i];
         }
 	    {{model}}::create($data);
-        $this->progress();
 	}
 
 }
