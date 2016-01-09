@@ -3,6 +3,9 @@
 namespace ViKon\DbExporter;
 
 use Illuminate\Support\ServiceProvider;
+use ViKon\DbExporter\Console\Commands\MigrateCommand;
+use ViKon\DbExporter\Console\Commands\ModelsCommand;
+use ViKon\DbExporter\Console\Commands\SeedCommand;
 
 /**
  * Class DbExporterServiceProvider
@@ -11,14 +14,16 @@ use Illuminate\Support\ServiceProvider;
  *
  * @package ViKon\DbExporter
  */
-class DbExporterServiceProvider extends ServiceProvider {
+class DbExporterServiceProvider extends ServiceProvider
+{
 
     /**
      * Bootstrap the application events.
      *
      * @return void
      */
-    public function boot() {
+    public function boot()
+    {
         $this->publishes([
             __DIR__ . '/../../config/config.php' => config_path('db-exporter.php'),
         ], 'config');
@@ -29,10 +34,11 @@ class DbExporterServiceProvider extends ServiceProvider {
      *
      * @return void
      */
-    public function register() {
-        $this->commands('ViKon\DbExporter\Console\Commands\MigrateCommand');
-        $this->commands('ViKon\DbExporter\Console\Commands\ModelsCommand');
-        $this->commands('ViKon\DbExporter\Console\Commands\SeedCommand');
+    public function register()
+    {
+        $this->commands(MigrateCommand::class);
+        $this->commands(ModelsCommand::class);
+        $this->commands(SeedCommand::class);
 
         $this->mergeConfigFrom(__DIR__ . '/../../config/config.php', 'db-exporter');
     }
@@ -42,7 +48,8 @@ class DbExporterServiceProvider extends ServiceProvider {
      *
      * @return array
      */
-    public function provides() {
+    public function provides()
+    {
         return [];
     }
 }

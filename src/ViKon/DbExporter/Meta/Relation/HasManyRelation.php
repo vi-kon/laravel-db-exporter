@@ -9,14 +9,16 @@ namespace ViKon\DbExporter\Meta\Relation;
  *
  * @package ViKon\DbExporter\Meta\Relation
  */
-class HasManyRelation extends AbstractRelation {
+class HasManyRelation extends AbstractRelation
+{
     /** @var string template name in stub directory */
     protected $templateName = 'methodHasMany';
 
     /**
      * @inheritdoc
      */
-    public function __construct($foreignClass, $methodName, $foreignColumnName, $localColumnName) {
+    public function __construct($foreignClass, $methodName, $foreignColumnName, $localColumnName)
+    {
         parent::__construct($foreignClass, str_plural($methodName), $foreignColumnName, $localColumnName);
     }
 }

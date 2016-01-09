@@ -3,7 +3,7 @@
 namespace ViKon\DbExporter\Meta;
 
 use Doctrine\DBAL\Types\Type;
-use ViKon\DbExporter\DbExporterException;
+use ViKon\DbExporter\Exception\DbExporterException;
 use ViKon\DbExporter\Helper\DatabaseSchemaHelper;
 use ViKon\DbExporter\Helper\TableHelper;
 
@@ -14,14 +14,16 @@ use ViKon\DbExporter\Helper\TableHelper;
  *
  * @package ViKon\DbExporter\Meta
  */
-class MigrationTable {
+class MigrationTable
+{
     use DatabaseSchemaHelper, TableHelper;
 
     /**
      * @param string|null $connectionName connection name
-     * @param string|null $tableName      table name
+     * @param string|null $tableName table name
      */
-    public function __construct($connectionName, $tableName) {
+    public function __construct($connectionName, $tableName)
+    {
         $this->setConnectionName($connectionName);
         $this->setTableName($tableName);
     }
@@ -31,9 +33,10 @@ class MigrationTable {
      *
      * @return string
      *
-     * @throws \ViKon\DbExporter\DbExporterException
+     * @throws \ViKon\DbExporter\Exception\DbExporterException
      */
-    public function renderCreateColumns() {
+    public function renderCreateColumns()
+    {
         $columns = $this->getTableColumns();
 
         if (!$columns) {
@@ -118,7 +121,8 @@ class MigrationTable {
      *
      * @return string
      */
-    public function renderCreateIndexes() {
+    public function renderCreateIndexes()
+    {
         $indexes = $this->getTableIndexes();
         if (!$indexes) {
             return '';
@@ -144,7 +148,8 @@ class MigrationTable {
      *
      * @return string
      */
-    public function renderCreateForeignKeys() {
+    public function renderCreateForeignKeys()
+    {
         $foreignKeys = $this->getTableForeignKeys();
 
         if (!$foreignKeys) {
@@ -179,7 +184,8 @@ class MigrationTable {
      *
      * @return string
      */
-    public function renderDropForeignKeys() {
+    public function renderDropForeignKeys()
+    {
         $foreignKeys = $this->getTableForeignKeys();
 
         if (!$foreignKeys) {

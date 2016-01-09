@@ -11,7 +11,8 @@ use ViKon\DbExporter\Helper\TemplateHelper;
  *
  * @package ViKon\DbExporter\Meta\Relation
  */
-abstract class AbstractRelation {
+abstract class AbstractRelation
+{
     use TemplateHelper;
 
     /** @var string */
@@ -27,12 +28,13 @@ abstract class AbstractRelation {
     protected $localColumnName;
 
     /**
-     * @param string $foreignClass      foreign model full class name
-     * @param string $methodName        method name
+     * @param string $foreignClass foreign model full class name
+     * @param string $methodName method name
      * @param string $foreignColumnName foreign column name
-     * @param string $localColumnName   local column name
+     * @param string $localColumnName local column name
      */
-    public function __construct($foreignClass, $methodName, $foreignColumnName, $localColumnName) {
+    public function __construct($foreignClass, $methodName, $foreignColumnName, $localColumnName)
+    {
         $this->foreignClass = $foreignClass;
         $this->methodName = $methodName;
         $this->foreignColumnName = $foreignColumnName;
@@ -44,7 +46,8 @@ abstract class AbstractRelation {
      *
      * @return string
      */
-    public function renderMethod() {
+    public function renderMethod()
+    {
         return $this->renderTemplate($this->templateName, [
             'className'     => $this->foreignClass,
             'methodName'    => camel_case($this->methodName),

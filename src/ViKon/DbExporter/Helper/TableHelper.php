@@ -2,7 +2,7 @@
 
 namespace ViKon\DbExporter\Helper;
 
-use ViKon\DbExporter\DbExporterException;
+use ViKon\DbExporter\Exception\DbExporterException;
 
 /**
  * Class TableHelper
@@ -11,7 +11,8 @@ use ViKon\DbExporter\DbExporterException;
  *
  * @package ViKon\DbExporter\Helper
  */
-trait TableHelper {
+trait TableHelper
+{
 
     /** @var string|null default table name */
     protected $tableName = null;
@@ -19,13 +20,14 @@ trait TableHelper {
     /**
      * Get index by columns name
      *
-     * @param string|string[] $columnNames    columns name to match index columns
-     * @param string|null     $tableName      table name
-     * @param string|null     $connectionName database connection name (if null default connection is used)
+     * @param string|string[] $columnNames columns name to match index columns
+     * @param string|null $tableName table name
+     * @param string|null $connectionName database connection name (if null default connection is used)
      *
      * @return bool|\Doctrine\DBAL\Schema\Index FALSE if index not found, otherwise Index instance
      */
-    public function getTableIndexByColumnsName($columnNames, $tableName = null, $connectionName = null) {
+    public function getTableIndexByColumnsName($columnNames, $tableName = null, $connectionName = null)
+    {
         if (!is_array($columnNames)) {
             $columnNames = [$columnNames];
         }
@@ -48,12 +50,13 @@ trait TableHelper {
     /**
      * Get table columns information
      *
-     * @param string      $tableName      table name
+     * @param string $tableName table name
      * @param string|null $connectionName database connection name (if null default connection is used)
      *
      * @return \Doctrine\DBAL\Schema\Column[]
      */
-    public function getTableColumns($tableName = null, $connectionName = null) {
+    public function getTableColumns($tableName = null, $connectionName = null)
+    {
         $tableName = $this->validateTableName($tableName);
 
         return $this->getSchema($connectionName)->listTableColumns($tableName);
@@ -62,12 +65,13 @@ trait TableHelper {
     /**
      * Get table foreign key information
      *
-     * @param string      $tableName      table name
+     * @param string $tableName table name
      * @param string|null $connectionName database connection name (if null default connection is used)
      *
      * @return \Doctrine\DBAL\Schema\ForeignKeyConstraint[]
      */
-    public function getTableForeignKeys($tableName = null, $connectionName = null) {
+    public function getTableForeignKeys($tableName = null, $connectionName = null)
+    {
         $tableName = $this->validateTableName($tableName);
 
         return $this->getSchema($connectionName)->listTableForeignKeys($tableName);
@@ -76,12 +80,13 @@ trait TableHelper {
     /**
      * Get tables foreign table names from foreign keys
      *
-     * @param string      $tableName      table name
+     * @param string $tableName table name
      * @param string|null $connectionName database connection name (if null default connection is used)
      *
      * @return string[]
      */
-    public function getForeignTableNames($tableName = null, $connectionName = null) {
+    public function getForeignTableNames($tableName = null, $connectionName = null)
+    {
         $foreignKeys = $this->getTableForeignKeys($tableName, $connectionName);
         $tableNames = [];
 
@@ -97,7 +102,8 @@ trait TableHelper {
      *
      * @return null|string
      */
-    public function getTableName() {
+    public function getTableName()
+    {
         return $this->tableName;
     }
 
@@ -108,7 +114,8 @@ trait TableHelper {
      *
      * @return $this
      */
-    protected function setTableName($tableName) {
+    protected function setTableName($tableName)
+    {
         $this->tableName = $tableName;
 
         return $this;
@@ -117,12 +124,13 @@ trait TableHelper {
     /**
      * Get table indexes
      *
-     * @param string|null $tableName      table name
+     * @param string|null $tableName table name
      * @param string|null $connectionName database connection name (if null default connection is used)
      *
      * @return \Doctrine\DBAL\Schema\Index[]
      */
-    protected function getTableIndexes($tableName = null, $connectionName = null) {
+    protected function getTableIndexes($tableName = null, $connectionName = null)
+    {
         $tableName = $this->validateTableName($tableName);
 
         return $this->getSchema($connectionName)->listTableIndexes($tableName);
@@ -135,9 +143,10 @@ trait TableHelper {
      *
      * @return null|string
      *
-     * @throws \ViKon\DbExporter\DbExporterException
+     * @throws \ViKon\DbExporter\Exception\DbExporterException
      */
-    protected function validateTableName($tableName = null) {
+    protected function validateTableName($tableName = null)
+    {
         $tableName = $tableName === null ? $this->tableName : $tableName;
 
         if ($tableName === null) {
@@ -153,11 +162,12 @@ trait TableHelper {
      * All elements will snake cased
      *
      * @param array|string $attributes column name
-     * @param bool         $forceArray force array form even if array contains single value
+     * @param bool $forceArray force array form even if array contains single value
      *
      * @return array|string
      */
-    protected function serializeArrayToAttributes($attributes, $forceArray = false) {
+    protected function serializeArrayToAttributes($attributes, $forceArray = false)
+    {
         if (!is_array($attributes)) {
             $attributes = [$attributes];
         }
@@ -177,7 +187,8 @@ trait TableHelper {
      *
      * @return string
      */
-    protected function serializeIndexNameToAttribute($indexName) {
+    protected function serializeIndexNameToAttribute($indexName)
+    {
         if (strtolower($indexName) === 'primary') {
             $indexName = 'prim';
         }
@@ -193,7 +204,8 @@ trait TableHelper {
      *
      * @return bool
      */
-    protected function skipTable($tableName) {
+    protected function skipTable($tableName)
+    {
         // Check if select options is set and table name is not selected
         if (count($this->option('select')) > 0 && !in_array($tableName, $this->option('select'))) {
             return true;

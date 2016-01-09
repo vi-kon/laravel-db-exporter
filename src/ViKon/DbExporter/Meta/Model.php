@@ -13,7 +13,8 @@ use ViKon\DbExporter\Helper\TemplateHelper;
  *
  * @package ViKon\DbExporter\Meta
  */
-class Model {
+class Model
+{
     use TemplateHelper, ClassHelper;
 
     /** @var \ViKon\DbExporter\Meta\ModelTable */
@@ -21,9 +22,10 @@ class Model {
 
     /**
      * @param string|null $connectionName connection name
-     * @param string|null $tableName      table name
+     * @param string|null $tableName table name
      */
-    public function __construct($connectionName, $tableName) {
+    public function __construct($connectionName, $tableName)
+    {
         $this->table = new ModelTable($connectionName, $tableName);
         $this->setClass($tableName);
     }
@@ -31,14 +33,16 @@ class Model {
     /**
      * @return \ViKon\DbExporter\Meta\ModelTable
      */
-    public function getTable() {
+    public function getTable()
+    {
         return $this->table;
     }
 
     /**
      * Apply custom config map settings if pattern exists
      */
-    public function map() {
+    public function map()
+    {
         $map = config('db-exporter.model.map');
 
         foreach ($map as $item) {
@@ -63,9 +67,10 @@ class Model {
      * Render model class and write out to file
      *
      * @param \Symfony\Component\Console\Output\OutputInterface|null $output command line output
-     * @param bool                                                   $force  force overwrite existing models or not
+     * @param bool $force force overwrite existing models or not
      */
-    public function writeOut(OutputInterface $output = null, $force = false) {
+    public function writeOut(OutputInterface $output = null, $force = false)
+    {
         $class = str_singular($this->getClass());
 
         $this->writeToFileFromTemplate($this->path . '/' . $class . '.php', 'model', $output, [

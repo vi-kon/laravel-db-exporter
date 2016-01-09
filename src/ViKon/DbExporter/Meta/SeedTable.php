@@ -12,14 +12,16 @@ use ViKon\DbExporter\Helper\TableHelper;
  *
  * @package ViKon\DbExporter\Meta
  */
-class SeedTable {
+class SeedTable
+{
     use DatabaseSchemaHelper, TableHelper;
 
     /**
      * @param string|null $connectionName connection name
-     * @param string|null $tableName      table name
+     * @param string|null $tableName table name
      */
-    public function __construct($connectionName, $tableName) {
+    public function __construct($connectionName, $tableName)
+    {
         $this->setConnectionName($connectionName);
         $this->setTableName($tableName);
     }
@@ -29,7 +31,8 @@ class SeedTable {
      *
      * @return array
      */
-    public function getData() {
+    public function getData()
+    {
         return \DB::connection($this->connectionName)->select('SELECT * FROM ' . $this->tableName);
     }
 }

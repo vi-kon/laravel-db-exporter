@@ -16,7 +16,8 @@ use ViKon\DbExporter\Meta\Migration;
  *
  * @package ViKon\DbExporter\Console\Commands
  */
-class MigrateCommand extends Command {
+class MigrateCommand extends Command
+{
     use DatabaseSchemaHelper, DatabaseHelper, TableHelper;
 
     /**
@@ -36,7 +37,8 @@ class MigrateCommand extends Command {
     /**
      * Create a new command instance.
      */
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
     }
 
@@ -45,7 +47,8 @@ class MigrateCommand extends Command {
      *
      * @return mixed
      */
-    public function fire() {
+    public function fire()
+    {
         $this->info('Creating migration files from database...');
 
         $migrations = $this->createMigrations();
@@ -71,7 +74,8 @@ class MigrateCommand extends Command {
         $this->call('optimize');
     }
 
-    public function createMigrations() {
+    public function createMigrations()
+    {
         $path = $this->option('path');
         $connectionName = $this->option('connection');
 
@@ -94,11 +98,12 @@ class MigrateCommand extends Command {
     /**
      * Export table to file
      *
-     * @param int                                $index      file index
+     * @param int $index file index
      * @param \ViKon\DbExporter\Meta\Migration[] $migrations available tables instances
-     * @param \ViKon\DbExporter\Meta\Migration   $migration  actual table instance files
+     * @param \ViKon\DbExporter\Meta\Migration $migration actual table instance files
      */
-    protected function processMigration(&$index, array $migrations, Migration $migration) {
+    protected function processMigration(&$index, array $migrations, Migration $migration)
+    {
         if (in_array($migration->getStatus(), [Migration::STATUS_MIGRATED, Migration::STATUS_RECURSIVE_FOREIGN_KEY])) {
             return;
         }
@@ -134,7 +139,8 @@ class MigrateCommand extends Command {
      *
      * @return array
      */
-    protected function getOptions() {
+    protected function getOptions()
+    {
         return [
             ['prefix', null, InputOption::VALUE_OPTIONAL, 'Table prefix in migration files', config('db-exporter.prefix')],
             ['select', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Select specified database tables only', config('db-exporter.select')],

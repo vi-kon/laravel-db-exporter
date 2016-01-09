@@ -9,7 +9,8 @@ namespace ViKon\DbExporter\Helper;
  *
  * @package ViKon\DbExporter\Helper
  */
-trait DatabaseHelper {
+trait DatabaseHelper
+{
     /**
      * Get database table names
      *
@@ -17,7 +18,8 @@ trait DatabaseHelper {
      *
      * @return string[] table names
      */
-    public function getDatabaseTableNames($connectionName = null) {
+    public function getDatabaseTableNames($connectionName = null)
+    {
         return $this->getSchema($connectionName)->listTableNames();
     }
 }

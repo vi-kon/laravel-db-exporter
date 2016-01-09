@@ -17,7 +17,8 @@ use ViKon\DbExporter\Meta\Seed;
  *
  * @package ViKon\DbExporter\Console\Commands
  */
-class SeedCommand extends Command {
+class SeedCommand extends Command
+{
     use DatabaseSchemaHelper, DatabaseHelper, TableHelper, TemplateHelper;
 
     /**
@@ -37,7 +38,8 @@ class SeedCommand extends Command {
     /**
      * Create a new command instance.
      */
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
     }
 
@@ -46,7 +48,8 @@ class SeedCommand extends Command {
      *
      * @return mixed
      */
-    public function fire() {
+    public function fire()
+    {
         $this->info('Creating seeds from database...');
 
         $path = $this->option('path');
@@ -81,7 +84,8 @@ class SeedCommand extends Command {
      *
      * @return array
      */
-    protected function getOptions() {
+    protected function getOptions()
+    {
         return [
             ['prefix', null, InputOption::VALUE_OPTIONAL, 'Table prefix in migration files', config('db-exporter.prefix')],
             ['select', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Select specified database tables only', config('db-exporter.select')],

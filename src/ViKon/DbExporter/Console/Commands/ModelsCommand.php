@@ -16,7 +16,8 @@ use ViKon\DbExporter\Meta\Model;
  *
  * @package ViKon\DbExporter\Console\Commands
  */
-class ModelsCommand extends Command {
+class ModelsCommand extends Command
+{
     use DatabaseSchemaHelper, DatabaseHelper, TableHelper;
 
     /**
@@ -36,7 +37,8 @@ class ModelsCommand extends Command {
     /**
      * Create a new command instance.
      */
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
     }
 
@@ -45,7 +47,8 @@ class ModelsCommand extends Command {
      *
      * @return mixed
      */
-    public function fire() {
+    public function fire()
+    {
         $this->info('Creating models from database...');
 
         $models = $this->createModels();
@@ -64,7 +67,8 @@ class ModelsCommand extends Command {
      *
      * @return \ViKon\DbExporter\Meta\Model[]
      */
-    protected function createModels() {
+    protected function createModels()
+    {
         $path = $this->option('path');
         $namespace = $this->option('namespace');
         $connectionName = $this->option('connection');
@@ -92,7 +96,8 @@ class ModelsCommand extends Command {
      *
      * @param \ViKon\DbExporter\Meta\Model[] $models
      */
-    protected function makeRelations(array $models) {
+    protected function makeRelations(array $models)
+    {
         foreach ($models as $model) {
             $localTable = $model->getTable();
             $foreignKeys = $localTable->getTableForeignKeys();
@@ -148,7 +153,8 @@ class ModelsCommand extends Command {
      *
      * @return array
      */
-    protected function getOptions() {
+    protected function getOptions()
+    {
         return [
             ['prefix', null, InputOption::VALUE_OPTIONAL, 'Table prefix in models', config('db-exporter.prefix')],
             ['select', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Select specified database tables only', config('db-exporter.select')],

@@ -9,7 +9,8 @@ namespace ViKon\DbExporter\Helper;
  *
  * @package ViKon\DbExporter\Helper
  */
-trait DatabaseSchemaHelper {
+trait DatabaseSchemaHelper
+{
     /** @var string|null trait default connection name */
     protected $connectionName = null;
 
@@ -20,7 +21,8 @@ trait DatabaseSchemaHelper {
      *
      * @return $this
      */
-    protected function setConnectionName($connectionName) {
+    protected function setConnectionName($connectionName)
+    {
         $this->connectionName = $connectionName;
 
         return $this;
@@ -33,7 +35,8 @@ trait DatabaseSchemaHelper {
      *
      * @return \Doctrine\DBAL\Schema\AbstractSchemaManager
      */
-    protected function getSchema($connectionName = null) {
+    protected function getSchema($connectionName = null)
+    {
         $connectionName = $connectionName === null ? $this->connectionName : $connectionName;
 
         /** @var \Doctrine\DBAL\Schema\AbstractSchemaManager $schema */

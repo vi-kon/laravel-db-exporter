@@ -9,7 +9,8 @@ namespace ViKon\DbExporter\Helper;
  *
  * @package ViKon\DbExporter\Helper
  */
-trait ClassHelper {
+trait ClassHelper
+{
 
     /** @var null|string */
     protected $path = null;
@@ -23,42 +24,48 @@ trait ClassHelper {
     /**
      * @return null|string
      */
-    public function getPath() {
+    public function getPath()
+    {
         return $this->path;
     }
 
     /**
      * @param null|string $path
      */
-    public function setPath($path) {
+    public function setPath($path)
+    {
         $this->path = $path;
     }
 
     /**
      * @return null|string
      */
-    public function getNamespace() {
+    public function getNamespace()
+    {
         return $this->namespace;
     }
 
     /**
      * @param null|string $namespace
      */
-    public function setNamespace($namespace) {
+    public function setNamespace($namespace)
+    {
         $this->namespace = $namespace;
     }
 
     /**
      * @return null|string
      */
-    public function getClass() {
+    public function getClass()
+    {
         return studly_case($this->class);
     }
 
     /**
      * @param null|string $class
      */
-    public function setClass($class) {
+    public function setClass($class)
+    {
         $this->class = snake_case($class);
     }
 
@@ -67,7 +74,8 @@ trait ClassHelper {
      *
      * @return string
      */
-    public function getFullClass() {
+    public function getFullClass()
+    {
         return ($this->namespace === null ? '' : $this->namespace . '\\') . $this->getClass();
     }
 

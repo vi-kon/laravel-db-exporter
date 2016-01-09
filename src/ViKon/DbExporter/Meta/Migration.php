@@ -12,7 +12,8 @@ use ViKon\DbExporter\Helper\TemplateHelper;
  *
  * @package ViKon\DbExporter\Meta
  */
-class Migration {
+class Migration
+{
     use TemplateHelper;
 
     const STATUS_WAITING = 0;
@@ -31,48 +32,54 @@ class Migration {
 
     /**
      * @param string|null $connectionName connection name
-     * @param string|null $tableName      table name
+     * @param string|null $tableName table name
      */
-    public function __construct($connectionName, $tableName) {
+    public function __construct($connectionName, $tableName)
+    {
         $this->table = new MigrationTable($connectionName, $tableName);
     }
 
     /**
      * @param string $path
      */
-    public function setPath($path) {
+    public function setPath($path)
+    {
         $this->path = $path;
     }
 
     /**
      * @return int
      */
-    public function getStatus() {
+    public function getStatus()
+    {
         return $this->status;
     }
 
     /**
      * @param int $status
      */
-    public function setStatus($status) {
+    public function setStatus($status)
+    {
         $this->status = $status;
     }
 
     /**
      * @return \ViKon\DbExporter\Meta\MigrationTable
      */
-    public function getTable() {
+    public function getTable()
+    {
         return $this->table;
     }
 
     /**
      * Render migration create table class and write out to file
      *
-     * @param int                                                    $index  migration file index
+     * @param int $index migration file index
      * @param \Symfony\Component\Console\Output\OutputInterface|null $output command line output
-     * @param bool                                                   $force  force overwrite existing models or not
+     * @param bool $force force overwrite existing models or not
      */
-    public function writeTableOut($index, OutputInterface $output = null, $force = false) {
+    public function writeTableOut($index, OutputInterface $output = null, $force = false)
+    {
         if ($this->status !== self::STATUS_IN_PROGRESS && $this->status !== self::STATUS_RECURSIVE_FOREIGN_KEY) {
             return;
         }
@@ -93,11 +100,12 @@ class Migration {
     /**
      * Render migration add foreign keys to table class and write out to file
      *
-     * @param int                                                    $index  migration file index
+     * @param int $index migration file index
      * @param \Symfony\Component\Console\Output\OutputInterface|null $output command line output
-     * @param bool                                                   $force  force overwrite existing models or not
+     * @param bool $force force overwrite existing models or not
      */
-    public function writeForeignKeysOut($index, OutputInterface $output = null, $force = false) {
+    public function writeForeignKeysOut($index, OutputInterface $output = null, $force = false)
+    {
         if ($this->status !== self::STATUS_RECURSIVE_FOREIGN_KEY) {
             return;
         }
