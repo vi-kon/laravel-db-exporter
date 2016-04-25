@@ -20,7 +20,7 @@ class MigrationTable
 
     /**
      * @param string|null $connectionName connection name
-     * @param string|null $tableName table name
+     * @param string|null $tableName      table name
      */
     public function __construct($connectionName, $tableName)
     {
@@ -47,7 +47,7 @@ class MigrationTable
 
         foreach ($columns as $column) {
             $attributes = [$this->serializeArrayToAttributes($column->getName())];
-            $type = $column->getType()->getName();
+            $type       = $column->getType()->getName();
 
             switch ($type) {
                 case Type::INTEGER:
@@ -61,7 +61,7 @@ class MigrationTable
                     break;
                 case Type::STRING:
                     $attributes[] = $column->getLength();
-                    $method = 'string';
+                    $method       = 'string';
                     break;
                 case Type::GUID:
                 case Type::TEXT:
@@ -73,7 +73,7 @@ class MigrationTable
                 case Type::DECIMAL:
                     $attributes[] = $column->getPrecision();
                     $attributes[] = $column->getScale();
-                    $method = 'decimal';
+                    $method       = 'decimal';
                     break;
                 case Type::BOOLEAN:
                     $method = 'boolean';
@@ -130,7 +130,7 @@ class MigrationTable
         $source = '';
         foreach ($indexes as $index) {
             $columns = $this->serializeArrayToAttributes($index->getColumns());
-            $name = $this->serializeIndexNameToAttribute($index->getName());
+            $name    = $this->serializeIndexNameToAttribute($index->getName());
             if ($index->isPrimary()) {
                 $source .= "\n" . '$table->primary(' . $columns . ', ' . $name . ');';
             } elseif ($index->isUnique()) {
@@ -158,9 +158,9 @@ class MigrationTable
 
         $source = '';
         foreach ($foreignKeys as $foreignKey) {
-            $name = $this->serializeIndexNameToAttribute($foreignKey->getName());
-            $localColumns = $this->serializeArrayToAttributes($foreignKey->getLocalColumns());
-            $foreignColumns = $this->serializeArrayToAttributes($foreignKey->getForeignColumns());
+            $name             = $this->serializeIndexNameToAttribute($foreignKey->getName());
+            $localColumns     = $this->serializeArrayToAttributes($foreignKey->getLocalColumns());
+            $foreignColumns   = $this->serializeArrayToAttributes($foreignKey->getForeignColumns());
             $foreignTableName = '\'' . snake_case($foreignKey->getForeignTableName()) . '\'';
             $source .= "\n" . '$table->foreign(' . $localColumns . ', ' . $name . ')';
             $source .= "\n" . '      ->references(' . $foreignColumns . ')';

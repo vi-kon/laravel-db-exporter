@@ -7,7 +7,7 @@ namespace ViKon\DbExporter\Exception;
  *
  * @package ViKon\DbExporter\Exception
  *
- * @author Kovács Vince <vincekovacs@hotmail.com>
+ * @author  Kovács Vince <vincekovacs@hotmail.com>
  */
 class DbExporterException extends \Exception
 {

@@ -14,12 +14,11 @@ use ViKon\DbExporter\Exception\DbExporterException;
  */
 trait TemplateHelper
 {
-
     /**
      * Get rendered template
      *
      * @param string $templateName template file name
-     * @param array $variables array of template variables (key value pairs)
+     * @param array  $variables    array of template variables (key value pairs)
      *
      * @return string
      *
@@ -34,7 +33,7 @@ trait TemplateHelper
 
         $template = file_get_contents($templatePath);
 
-        $search = array_keys($variables);
+        $search  = array_keys($variables);
         $replace = array_values($variables);
 
         foreach ($search as &$item) {
@@ -47,12 +46,12 @@ trait TemplateHelper
     /**
      * Render template content and write to file
      *
-     * @param string $path output relative file name
-     * @param string $templateName source relative template file name
-     * @param \Symfony\Component\Console\Output\OutputInterface|null $output command line output
-     * @param array $variables array of template variable key value
+     * @param string                                                 $path         output relative file name
+     * @param string                                                 $templateName source relative template file name
+     * @param \Symfony\Component\Console\Output\OutputInterface|null $output       command line output
+     * @param array                                                  $variables    array of template variable key value
      *                                                                             pairs
-     * @param bool $overwrite if output file exists and this
+     * @param bool                                                   $overwrite    if output file exists and this
      *                                                                             option is TRUE overwrite file,
      *                                                                             otherwise skip
      *
@@ -60,7 +59,7 @@ trait TemplateHelper
      */
     protected function writeToFileFromTemplate($path, $templateName, OutputInterface $output = null, array $variables = [], $overwrite = false)
     {
-        if ($overwrite || !file_exists($path) && !is_dir($path)) {
+        if ($overwrite || (!file_exists($path) && !is_dir($path))) {
             $dir = dirname($path);
             if (!file_exists($dir) || !is_dir($dir)) {
                 mkdir($dir, 0777, true);

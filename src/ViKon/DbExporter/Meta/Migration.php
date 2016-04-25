@@ -16,10 +16,10 @@ class Migration
 {
     use TemplateHelper;
 
-    const STATUS_WAITING = 0;
-    const STATUS_IN_PROGRESS = 1;
+    const STATUS_WAITING               = 0;
+    const STATUS_IN_PROGRESS           = 1;
     const STATUS_RECURSIVE_FOREIGN_KEY = 2;
-    const STATUS_MIGRATED = 3;
+    const STATUS_MIGRATED              = 3;
 
     /** @var string */
     protected $path;
@@ -32,7 +32,7 @@ class Migration
 
     /**
      * @param string|null $connectionName connection name
-     * @param string|null $tableName table name
+     * @param string|null $tableName      table name
      */
     public function __construct($connectionName, $tableName)
     {
@@ -74,9 +74,9 @@ class Migration
     /**
      * Render migration create table class and write out to file
      *
-     * @param int $index migration file index
+     * @param int                                                    $index  migration file index
      * @param \Symfony\Component\Console\Output\OutputInterface|null $output command line output
-     * @param bool $force force overwrite existing models or not
+     * @param bool                                                   $force  force overwrite existing models or not
      */
     public function writeTableOut($index, OutputInterface $output = null, $force = false)
     {
@@ -100,9 +100,9 @@ class Migration
     /**
      * Render migration add foreign keys to table class and write out to file
      *
-     * @param int $index migration file index
+     * @param int                                                    $index  migration file index
      * @param \Symfony\Component\Console\Output\OutputInterface|null $output command line output
-     * @param bool $force force overwrite existing models or not
+     * @param bool                                                   $force  force overwrite existing models or not
      */
     public function writeForeignKeysOut($index, OutputInterface $output = null, $force = false)
     {

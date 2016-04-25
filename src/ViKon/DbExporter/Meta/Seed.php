@@ -25,7 +25,7 @@ class Seed
 
     /**
      * @param string|null $connectionName connection name
-     * @param string|null $tableName table name
+     * @param string|null $tableName      table name
      */
     public function __construct($connectionName, $tableName)
     {
@@ -63,8 +63,8 @@ class Seed
      */
     public function renderData()
     {
-        $columns = $this->table->getTableColumns();
-        $types = [];
+        $columns   = $this->table->getTableColumns();
+        $types     = [];
         $structure = [];
         foreach ($columns as $column) {
             $structure[] = snake_case(str_replace('ID', 'Id', $column->getName()));
@@ -143,7 +143,7 @@ class Seed
         $map = config('db-exporter.model.map');
 
         $namespace = config('db-exporter.model.namespace');
-        $class = snake_case($this->getTable()->getTableName());
+        $class     = snake_case($this->getTable()->getTableName());
 
         foreach ($map as $item) {
             // Find matching table name
@@ -153,7 +153,7 @@ class Seed
                 $namespace = $item['namespace'];
 
                 if ($item['className'] !== null) {
-                    $pattern = '/' . str_replace('/', '\/', $item['className']['pattern']) . '/';
+                    $pattern     = '/' . str_replace('/', '\/', $item['className']['pattern']) . '/';
                     $replacement = $item['className']['replacement'];
                     echo $replacement;
                     $class = preg_replace($pattern, $replacement, $class);
@@ -169,11 +169,11 @@ class Seed
      * Render seed class and write out to file
      *
      * @param \Symfony\Component\Console\Output\OutputInterface|null $output command line output
-     * @param bool $force force overwrite existing models or not
+     * @param bool                                                   $force  force overwrite existing models or not
      */
     public function writeSeedOut(OutputInterface $output, $force)
     {
-        $class = $this->getClass();
+        $class      = $this->getClass();
         $modelClass = $this->getModelClass();
 
         $fileName = $class . '.php';

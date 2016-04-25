@@ -18,7 +18,7 @@ class SeedTable
 
     /**
      * @param string|null $connectionName connection name
-     * @param string|null $tableName table name
+     * @param string|null $tableName      table name
      */
     public function __construct($connectionName, $tableName)
     {

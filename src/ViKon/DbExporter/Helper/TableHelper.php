@@ -13,9 +13,8 @@ use ViKon\DbExporter\Exception\DbExporterException;
  */
 trait TableHelper
 {
-
     /** @var string|null default table name */
-    protected $tableName = null;
+    protected $tableName;
 
     /**
      * Get index by columns name

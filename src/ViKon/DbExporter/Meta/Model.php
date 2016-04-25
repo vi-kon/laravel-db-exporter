@@ -22,7 +22,7 @@ class Model
 
     /**
      * @param string|null $connectionName connection name
-     * @param string|null $tableName table name
+     * @param string|null $tableName      table name
      */
     public function __construct($connectionName, $tableName)
     {
@@ -49,11 +49,11 @@ class Model
             // Find matching table name
             $tablePattern = '/' . str_replace('/', '\/', $item['tablePattern']) . '/';
             if (preg_match($tablePattern, $this->table->getTableName()) === 1) {
-                $this->path = $item['path'];
+                $this->path      = $item['path'];
                 $this->namespace = $item['namespace'];
 
                 if ($item['className'] !== null) {
-                    $pattern = '/' . str_replace('/', '\/', $item['className']['pattern']) . '/';
+                    $pattern     = '/' . str_replace('/', '\/', $item['className']['pattern']) . '/';
                     $replacement = $item['className']['replacement'];
                     echo $replacement;
                     $this->class = preg_replace($pattern, $replacement, $this->class);
@@ -67,7 +67,7 @@ class Model
      * Render model class and write out to file
      *
      * @param \Symfony\Component\Console\Output\OutputInterface|null $output command line output
-     * @param bool $force force overwrite existing models or not
+     * @param bool                                                   $force  force overwrite existing models or not
      */
     public function writeOut(OutputInterface $output = null, $force = false)
     {

@@ -24,7 +24,7 @@ class ModelTable
 
     /**
      * @param string|null $connectionName connection name
-     * @param string|null $tableName table name
+     * @param string|null $tableName      table name
      */
     public function __construct($connectionName, $tableName)
     {
@@ -33,10 +33,10 @@ class ModelTable
     }
 
     /**
-     * @param string $foreignModel foreign model full class name
-     * @param string $methodName method name
+     * @param string $foreignModel      foreign model full class name
+     * @param string $methodName        method name
      * @param string $foreignColumnName foreign column name
-     * @param string $localColumnName local column name
+     * @param string $localColumnName   local column name
      */
     public function addHasOneRelation($foreignModel, $methodName, $foreignColumnName, $localColumnName)
     {
@@ -44,10 +44,10 @@ class ModelTable
     }
 
     /**
-     * @param string $foreignModel foreign model full class name
-     * @param string $methodName method name
+     * @param string $foreignModel      foreign model full class name
+     * @param string $methodName        method name
      * @param string $foreignColumnName foreign column name
-     * @param string $localColumnName local column name
+     * @param string $localColumnName   local column name
      */
     public function addHasManyRelation($foreignModel, $methodName, $foreignColumnName, $localColumnName)
     {
@@ -55,10 +55,10 @@ class ModelTable
     }
 
     /**
-     * @param string $foreignModel foreign model full class name
-     * @param string $methodName method name
+     * @param string $foreignModel      foreign model full class name
+     * @param string $methodName        method name
      * @param string $foreignColumnName foreign column name
-     * @param string $localColumnName local column name
+     * @param string $localColumnName   local column name
      */
     public function addBelongsToRelation($foreignModel, $methodName, $foreignColumnName, $localColumnName)
     {

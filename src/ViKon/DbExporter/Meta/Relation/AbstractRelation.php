@@ -28,17 +28,17 @@ abstract class AbstractRelation
     protected $localColumnName;
 
     /**
-     * @param string $foreignClass foreign model full class name
-     * @param string $methodName method name
+     * @param string $foreignClass      foreign model full class name
+     * @param string $methodName        method name
      * @param string $foreignColumnName foreign column name
-     * @param string $localColumnName local column name
+     * @param string $localColumnName   local column name
      */
     public function __construct($foreignClass, $methodName, $foreignColumnName, $localColumnName)
     {
-        $this->foreignClass = $foreignClass;
-        $this->methodName = $methodName;
+        $this->foreignClass      = $foreignClass;
+        $this->methodName        = $methodName;
         $this->foreignColumnName = $foreignColumnName;
-        $this->localColumnName = $localColumnName;
+        $this->localColumnName   = $localColumnName;
     }
 
     /**
