@@ -25,7 +25,7 @@ class MigrateCommand extends Command
      */
     public function __construct()
     {
-        $this->signature   = 'db-exporter:migrate';
+        $this->signature   = 'vi-kon:db-exporter:migrate';
         $this->description = 'Create migration file from database tables';
 
         parent::__construct();
