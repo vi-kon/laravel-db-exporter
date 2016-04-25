@@ -11,15 +11,14 @@ namespace ViKon\DbExporter\Helper;
  */
 trait ClassHelper
 {
+    /** @var null|string */
+    protected $path;
 
     /** @var null|string */
-    protected $path = null;
+    protected $namespace;
 
     /** @var null|string */
-    protected $namespace = null;
-
-    /** @var null|string */
-    protected $class = null;
+    protected $class;
 
     /**
      * @return null|string
@@ -78,6 +77,5 @@ trait ClassHelper
     {
         return ($this->namespace === null ? '' : $this->namespace . '\\') . $this->getClass();
     }
-
 
 }

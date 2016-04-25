@@ -21,24 +21,13 @@ class MigrateCommand extends Command
     use DatabaseSchemaHelper, DatabaseHelper, TableHelper;
 
     /**
-     * The console command name.
-     *
-     * @var string
-     */
-    protected $name = 'db-exporter:migrate';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Create migration file from database tables';
-
-    /**
      * Create a new command instance.
      */
     public function __construct()
     {
+        $this->signature   = 'db-exporter:migrate';
+        $this->description = 'Create migration file from database tables';
+
         parent::__construct();
     }
 
@@ -76,7 +65,7 @@ class MigrateCommand extends Command
 
     public function createMigrations()
     {
-        $path = $this->option('path');
+        $path           = $this->option('path');
         $connectionName = $this->option('connection');
 
         $tableNames = $this->getDatabaseTableNames($connectionName);
@@ -98,13 +87,13 @@ class MigrateCommand extends Command
     /**
      * Export table to file
      *
-     * @param int $index file index
+     * @param int                                $index      file index
      * @param \ViKon\DbExporter\Meta\Migration[] $migrations available tables instances
-     * @param \ViKon\DbExporter\Meta\Migration $migration actual table instance files
+     * @param \ViKon\DbExporter\Meta\Migration   $migration  actual table instance files
      */
     protected function processMigration(&$index, array $migrations, Migration $migration)
     {
-        if (in_array($migration->getStatus(), [Migration::STATUS_MIGRATED, Migration::STATUS_RECURSIVE_FOREIGN_KEY])) {
+        if (in_array($migration->getStatus(), [Migration::STATUS_MIGRATED, Migration::STATUS_RECURSIVE_FOREIGN_KEY], true)) {
             return;
         }
         $migration->setStatus(Migration::STATUS_IN_PROGRESS);
@@ -143,8 +132,20 @@ class MigrateCommand extends Command
     {
         return [
             ['prefix', null, InputOption::VALUE_OPTIONAL, 'Table prefix in migration files', config('db-exporter.prefix')],
-            ['select', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Select specified database tables only', config('db-exporter.select')],
-            ['ignore', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Ignore specified database tables', config('db-exporter.ignore')],
+            [
+                'select',
+                null,
+                InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
+                'Select specified database tables only',
+                config('db-exporter.select'),
+            ],
+            [
+                'ignore',
+                null,
+                InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
+                'Ignore specified database tables',
+                config('db-exporter.ignore'),
+            ],
             ['connection', null, InputOption::VALUE_OPTIONAL, 'Specify database connection name', config('db-exporter.database')],
             ['force', null, InputOption::VALUE_NONE, 'Overwrite existing migration files'],
             ['path', null, InputOption::VALUE_OPTIONAL, 'Output destination path relative to project root', config('db-exporter.migration.path')],

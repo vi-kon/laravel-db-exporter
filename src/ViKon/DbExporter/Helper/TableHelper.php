@@ -20,9 +20,9 @@ trait TableHelper
     /**
      * Get index by columns name
      *
-     * @param string|string[] $columnNames columns name to match index columns
-     * @param string|null $tableName table name
-     * @param string|null $connectionName database connection name (if null default connection is used)
+     * @param string|string[] $columnNames    columns name to match index columns
+     * @param string|null     $tableName      table name
+     * @param string|null     $connectionName database connection name (if null default connection is used)
      *
      * @return bool|\Doctrine\DBAL\Schema\Index FALSE if index not found, otherwise Index instance
      */
@@ -33,7 +33,6 @@ trait TableHelper
         }
 
         $tableName = $this->validateTableName($tableName);
-
 
         $indexes = $this->getTableIndexes($tableName, $connectionName);
         foreach ($indexes as $index) {
@@ -50,7 +49,7 @@ trait TableHelper
     /**
      * Get table columns information
      *
-     * @param string $tableName table name
+     * @param string      $tableName      table name
      * @param string|null $connectionName database connection name (if null default connection is used)
      *
      * @return \Doctrine\DBAL\Schema\Column[]
@@ -65,7 +64,7 @@ trait TableHelper
     /**
      * Get table foreign key information
      *
-     * @param string $tableName table name
+     * @param string      $tableName      table name
      * @param string|null $connectionName database connection name (if null default connection is used)
      *
      * @return \Doctrine\DBAL\Schema\ForeignKeyConstraint[]
@@ -80,7 +79,7 @@ trait TableHelper
     /**
      * Get tables foreign table names from foreign keys
      *
-     * @param string $tableName table name
+     * @param string      $tableName      table name
      * @param string|null $connectionName database connection name (if null default connection is used)
      *
      * @return string[]
@@ -88,7 +87,7 @@ trait TableHelper
     public function getForeignTableNames($tableName = null, $connectionName = null)
     {
         $foreignKeys = $this->getTableForeignKeys($tableName, $connectionName);
-        $tableNames = [];
+        $tableNames  = [];
 
         foreach ($foreignKeys as $foreignKey) {
             $tableNames[] = $foreignKey->getForeignTableName();
@@ -124,7 +123,7 @@ trait TableHelper
     /**
      * Get table indexes
      *
-     * @param string|null $tableName table name
+     * @param string|null $tableName      table name
      * @param string|null $connectionName database connection name (if null default connection is used)
      *
      * @return \Doctrine\DBAL\Schema\Index[]
@@ -162,7 +161,7 @@ trait TableHelper
      * All elements will snake cased
      *
      * @param array|string $attributes column name
-     * @param bool $forceArray force array form even if array contains single value
+     * @param bool         $forceArray force array form even if array contains single value
      *
      * @return array|string
      */
@@ -207,17 +206,16 @@ trait TableHelper
     protected function skipTable($tableName)
     {
         // Check if select options is set and table name is not selected
-        if (count($this->option('select')) > 0 && !in_array($tableName, $this->option('select'))) {
+        if (count($this->option('select')) > 0 && !in_array($tableName, $this->option('select'), true)) {
             return true;
         }
 
         // Check if table name is ignored
-        if (in_array($tableName, $this->option('ignore'))) {
+        if (in_array($tableName, $this->option('ignore'), true)) {
             return true;
         }
 
         return false;
     }
-
 
 }

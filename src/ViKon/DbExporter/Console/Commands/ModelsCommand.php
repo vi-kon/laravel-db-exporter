@@ -21,24 +21,13 @@ class ModelsCommand extends Command
     use DatabaseSchemaHelper, DatabaseHelper, TableHelper;
 
     /**
-     * The console command name.
-     *
-     * @var string
-     */
-    protected $name = 'db-exporter:models';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Create models from database tables';
-
-    /**
      * Create a new command instance.
      */
     public function __construct()
     {
+        $this->signature   = 'db-exporter:models';
+        $this->description = 'Create models from database tables';
+
         parent::__construct();
     }
 
@@ -69,8 +58,8 @@ class ModelsCommand extends Command
      */
     protected function createModels()
     {
-        $path = $this->option('path');
-        $namespace = $this->option('namespace');
+        $path           = $this->option('path');
+        $namespace      = $this->option('namespace');
         $connectionName = $this->option('connection');
 
         $tableNames = $this->getDatabaseTableNames($connectionName);
@@ -99,7 +88,7 @@ class ModelsCommand extends Command
     protected function makeRelations(array $models)
     {
         foreach ($models as $model) {
-            $localTable = $model->getTable();
+            $localTable  = $model->getTable();
             $foreignKeys = $localTable->getTableForeignKeys();
 
             foreach ($foreignKeys as $foreignKey) {
@@ -110,20 +99,20 @@ class ModelsCommand extends Command
                 $foreignModel = $models[$foreignKey->getForeignTableName()];
                 $foreignTable = $foreignModel->getTable();
 
-                $localColumns = $foreignKey->getLocalColumns();
+                $localColumns   = $foreignKey->getLocalColumns();
                 $foreignColumns = $foreignKey->getForeignColumns();
 
-                $localIndex = $localTable->getTableIndexByColumnsName($localColumns);
+                $localIndex   = $localTable->getTableIndexByColumnsName($localColumns);
                 $foreignIndex = $foreignTable->getTableIndexByColumnsName($foreignColumns);
 
-                $localTableClass = str_singular($model->getFullClass());
+                $localTableClass   = str_singular($model->getFullClass());
                 $foreignTableClass = str_singular($foreignModel->getFullClass());
 
-                $localColumn = reset($localColumns);
+                $localColumn   = reset($localColumns);
                 $foreignColumn = reset($foreignColumns);
 
                 // Guess foreign method name
-                $localMethodName = str_replace(['_id'], '', snake_case($localColumn));
+                $localMethodName   = str_replace(['_id'], '', snake_case($localColumn));
                 $foreignMethodName = $model->getClass();
 
                 // Try to find out connection type
@@ -157,8 +146,20 @@ class ModelsCommand extends Command
     {
         return [
             ['prefix', null, InputOption::VALUE_OPTIONAL, 'Table prefix in models', config('db-exporter.prefix')],
-            ['select', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Select specified database tables only', config('db-exporter.select')],
-            ['ignore', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Ignore specified database tables', config('db-exporter.ignore')],
+            [
+                'select',
+                null,
+                InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
+                'Select specified database tables only',
+                config('db-exporter.select'),
+            ],
+            [
+                'ignore',
+                null,
+                InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
+                'Ignore specified database tables',
+                config('db-exporter.ignore'),
+            ],
             ['connection', null, InputOption::VALUE_OPTIONAL, 'Specify connection name', config('db-exporter.connection')],
             ['force', null, InputOption::VALUE_NONE, 'Overwrite existing model files'],
             ['namespace', null, InputOption::VALUE_OPTIONAL, 'Models base namespace', config('db-exporter.model.namespace')],
