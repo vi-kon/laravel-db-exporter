@@ -40,6 +40,29 @@ trait ViewHelper
      */
     public function render($view, array $data = [])
     {
+        $data['_indent'] = function ($text, $indent) {
+            return $this->indent($text, $indent);
+        };
+
         return $this->viewFactory->make($view, $data)->render();
+    }
+
+    /**
+     * Indent text with white spaces
+     *
+     * @param string $text
+     * @param int    $indent
+     *
+     * @return string
+     */
+    public function indent($text, $indent)
+    {
+        $chunks = explode("\n", $text);
+
+        $chunks = array_map(function ($chunk) use ($indent) {
+            return str_repeat(' ', $indent) . $chunk;
+        }, $chunks);
+
+        return implode("\n", $chunks);
     }
 }

@@ -40,7 +40,11 @@ class DbExporterServiceProvider extends ServiceProvider
         $this->commands(ModelsCommand::class);
         $this->commands(SeedCommand::class);
 
-        $this->mergeConfigFrom(__DIR__ . '/../../config/config.php', 'db-exporter');
+        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'vi-kon.db-exporter');
+
+        $this->mergeConfigFrom(__DIR__ . '/../../config/config.php', 'vi-kon.db-exporter');
+
+        $this->registerGenerator();
     }
 
     /**
@@ -50,6 +54,20 @@ class DbExporterServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return [];
+        return [
+            Generator::class,
+        ];
+    }
+
+    /**
+     * Register generator
+     *
+     * @return void
+     */
+    protected function registerGenerator()
+    {
+        $this->app->singleton(Generator::class, function () {
+            return new Generator($this->app);
+        });
     }
 }

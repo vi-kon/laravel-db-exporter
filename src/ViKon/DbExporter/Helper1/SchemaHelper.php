@@ -24,7 +24,7 @@ trait SchemaHelper
     {
         /** @var \ViKon\DbExporter\Helper1\ContainerHelper|\ViKon\DbExporter\Helper1\DatabaseHelper $this */
 
-        $connectionName !== null ? $connectionName : $this->getConnectionName();
+        $connectionName = $connectionName !== null ? $connectionName : $this->getConnectionName();
 
         $schema = $this->container->make('db')->connection($connectionName)->getDoctrineSchemaManager();
 
@@ -33,5 +33,7 @@ trait SchemaHelper
         // For Sqlite
         $schema->getDatabasePlatform()->registerDoctrineTypeMapping('long', 'integer');
         $schema->getDatabasePlatform()->registerDoctrineTypeMapping('bit', 'boolean');
+
+        return $schema;
     }
 }

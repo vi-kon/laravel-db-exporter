@@ -4,6 +4,7 @@ namespace ViKon\DbExporter\Console\Commands;
 
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
+use ViKon\DbExporter\Generator;
 use ViKon\DbExporter\Helper\DatabaseHelper;
 use ViKon\DbExporter\Helper\DatabaseSchemaHelper;
 use ViKon\DbExporter\Helper\TableHelper;
@@ -25,7 +26,13 @@ class MigrateCommand extends Command
      */
     public function __construct()
     {
-        $this->signature   = 'vi-kon:db-exporter:migrate';
+        $this->signature   = 'vi-kon:db-exporter:migrate'
+                             . ' {--prefix=     : Table prefix for migrations}'
+                             . ' {--connection= : Use specified connection for database migrations}'
+                             . ' {--only*=      : Select only specified tables}'
+                             . ' {--except*=    : Select every table except specified ones}'
+                             . ' {--force       : Overwrite existing files}'
+                             . ' {--path=       : Output path for migrations (Relative to project root)}';
         $this->description = 'Create migration file from database tables';
 
         parent::__construct();
@@ -40,29 +47,25 @@ class MigrateCommand extends Command
     {
         $this->info('Creating migration files from database...');
 
-        $migrations = $this->createMigrations();
+        $migration = $this->laravel->make(Generator::class)->migration();
 
-        $index = 0;
-
-        // Write migration files
-        foreach ($migrations as $migration) {
-            $this->processMigration($index, $migrations, $migration);
+        if ($this->input->hasOption('except')) {
+            $migration->except($this->option('except'));
+        }
+        if ($this->input->hasOption('only')) {
+            $migration->only($this->option('only'));
         }
 
-        // Write separated foreign keys if migration has recursive foreign key
-        foreach ($migrations as $migration) {
-            if ($migration->getStatus() === Migration::STATUS_RECURSIVE_FOREIGN_KEY) {
-                $migration->writeForeignKeysOut($index, $this->output, $this->option('force'));
-                $index++;
-            }
-        }
+        $migration->generate(base_path($this->option('path') === null ? 'database/migrations' : $this->option('path')), $this->option('force'));
 
         $this->info('Migration files successfully created');
-
-        $this->call('clear-compiled');
-        $this->call('optimize');
     }
 
+    /**
+     * Create migration metadata objects
+     *
+     * @return \ViKon\DbExporter\Meta\Migration[]
+     */
     public function createMigrations()
     {
         $path           = $this->option('path');
@@ -121,34 +124,5 @@ class MigrateCommand extends Command
         }
 
         $index++;
-    }
-
-    /**
-     * Get the console command options.
-     *
-     * @return array
-     */
-    protected function getOptions()
-    {
-        return [
-            ['prefix', null, InputOption::VALUE_OPTIONAL, 'Table prefix in migration files', config('db-exporter.prefix')],
-            [
-                'select',
-                null,
-                InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
-                'Select specified database tables only',
-                config('db-exporter.select'),
-            ],
-            [
-                'ignore',
-                null,
-                InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
-                'Ignore specified database tables',
-                config('db-exporter.ignore'),
-            ],
-            ['connection', null, InputOption::VALUE_OPTIONAL, 'Specify database connection name', config('db-exporter.database')],
-            ['force', null, InputOption::VALUE_NONE, 'Overwrite existing migration files'],
-            ['path', null, InputOption::VALUE_OPTIONAL, 'Output destination path relative to project root', config('db-exporter.migration.path')],
-        ];
     }
 }

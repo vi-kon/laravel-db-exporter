@@ -31,7 +31,7 @@ class Generator
     /**
      * Get migration generator
      *
-     * @return \ViKon\DbExporter\Generator\MigrationGenerator
+     * @return \ViKon\DbExporter\Contract\Generator\MigrationGenerator
      */
     public function migration()
     {

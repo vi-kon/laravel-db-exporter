@@ -6,6 +6,7 @@ use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Types\Type;
 use Illuminate\Support\Str;
+use RuntimeException;
 use ViKon\DbExporter\Exception\DbExporterException;
 use ViKon\DbExporter\Generator\Meta\Migration;
 use ViKon\DbExporter\Helper1\ContainerHelper;
@@ -20,12 +21,20 @@ use ViKon\DbExporter\Helper1\ViewHelper;
  *
  * @author  Kovács Vince<vincekovacs@hotmail.com>
  */
-class MigrationGenerator
+class MigrationGenerator implements \ViKon\DbExporter\Contract\Generator\MigrationGenerator
 {
     use ContainerHelper;
     use DatabaseHelper;
     use SchemaHelper;
     use ViewHelper;
+
+    protected static $columnNameMap = [
+        'ID' => 'Id',
+    ];
+
+    protected static $indexNameMap = [
+        'PRIMARY' => 'primary',
+    ];
 
     /** @type string[] */
     protected $only = [];
@@ -36,15 +45,17 @@ class MigrationGenerator
     /** @type int */
     protected $index;
 
+    /** @type string */
+    protected $path;
+
+    /** @type bool */
+    protected $force;
+
     /** @type \ViKon\DbExporter\Generator\Meta\Migration[] */
     protected $migrations;
 
     /**
-     * Select only specified tables
-     *
-     * @param array $tableNames
-     *
-     * @return $this
+     * {@inheritDoc}
      */
     public function only(array $tableNames)
     {
@@ -55,11 +66,7 @@ class MigrationGenerator
     }
 
     /**
-     * Select every table except specified ones
-     *
-     * @param array $tableNames
-     *
-     * @return $this
+     * {@inheritDoc}
      */
     public function except(array $tableNames)
     {
@@ -70,11 +77,13 @@ class MigrationGenerator
     }
 
     /**
-     * Generate migration files
+     * {@inheritDoc}
      */
-    public function generate()
+    public function generate($path, $force = false)
     {
         $this->index = 0;
+        $this->path  = $path;
+        $this->force = $force;
 
         $this->createMigration();
 
@@ -85,6 +94,8 @@ class MigrationGenerator
 
     /**
      * Create migration files
+     *
+     * @return void
      */
     protected function createMigration()
     {
@@ -99,6 +110,7 @@ class MigrationGenerator
 
             $this->migrations[$tableName] = new Migration($tableName);
         }
+
     }
 
     /**
@@ -110,17 +122,23 @@ class MigrationGenerator
      */
     protected function shouldSkipTable($tableName)
     {
-        if ($this->only !== [] && in_array($tableName, $this->only, true)) {
-            return true;
+        if ($this->only !== []) {
+            return in_array($tableName, $this->only, true);
+        }
+        if ($this->except !== []) {
+            return !in_array($tableName, $this->except, true);
         }
 
-        if ($this->except !== [] && !in_array($tableName, $this->except, true)) {
-            return true;
-        }
-
-        return $this->only === [] && $this->except === [];
+        return false;
     }
 
+    /**
+     * Process single migration
+     *
+     * @param \ViKon\DbExporter\Generator\Meta\Migration $migration
+     *
+     * @return void
+     */
     protected function processMigration(Migration $migration)
     {
         if (in_array($migration->getStatus(), [Migration::STATUS_MIGRATED, Migration::STATUS_RECURSIVE_FOREIGN_KEY], true)) {
@@ -152,11 +170,19 @@ class MigrationGenerator
 
         $class    = Str::studly('create_' . Str::snake($tableName) . '_table');
         $fileName = date('Y_m_d_') . str_pad($this->index, 6, '0', STR_PAD_LEFT) . '_' . Str::snake($class) . '.php';
+        $path     = $this->path . DIRECTORY_SEPARATOR . $fileName;
 
         $content = $this->renderTable($tableName, $class, $migration);
 
-        // Write out migration file
-        file_put_contents($fileName, $content);
+        if ($this->force || !file_exists($path) || !is_file($path)) {
+            if (!@mkdir($this->path) && !is_dir($this->path)) {
+                throw new RuntimeException('Cannot create ' . $this->path . ' directory');
+            }
+
+            if (file_put_contents($path, $content) === false) {
+                throw new RuntimeException('Cannot write out ' . $fileName . ' migration file');
+            }
+        }
 
         if ($migration->getStatus() !== Migration::STATUS_RECURSIVE_FOREIGN_KEY) {
             $migration->setStatus(Migration::STATUS_MIGRATED);
@@ -257,6 +283,13 @@ class MigrationGenerator
         return $output;
     }
 
+    /**
+     * Render foreign keys for template
+     *
+     * @param string $tableName
+     *
+     * @return string
+     */
     protected function renderForeignKeys($tableName)
     {
         $foreignKeys = $this->getTableForeignKeys($tableName);
@@ -385,6 +418,7 @@ class MigrationGenerator
         $columnNames = (array)$columnNames;
 
         foreach ($columnNames as &$columnName) {
+            $columnName = str_replace(array_keys(static::$columnNameMap), array_values(static::$columnNameMap), $columnName);
             $columnName = '\'' . Str::snake($columnName) . '\'';
         }
         unset($columnName);
@@ -407,6 +441,7 @@ class MigrationGenerator
         $indexNames = (array)$indexNames;
 
         foreach ($indexNames as &$indexName) {
+            $indexName = str_replace(array_keys(static::$indexNameMap), array_values(static::$indexNameMap), $indexName);
             $indexName = '\'' . Str::snake($indexName) . '\'';
         }
         unset($indexName);
